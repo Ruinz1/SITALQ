@@ -25,77 +25,59 @@ class KelasHasPesertaRelationManager extends RelationManager
 
     protected static ?string $title = 'Peserta Kelas';
 
+    private const CRITERIA_WEIGHTS = [
+        'pergaulan_dengan_sebaya' => 0.25,
+        'keterangan_membaca' => 0.25,
+        'keterangan_menulis' => 0.25,
+        'keterangan_menghitung' => 0.25
+    ];
+
+    private const SCORE_MAPPING = [
+        'pergaulan_dengan_sebaya' => [
+            'Aktif' => 1.0,
+            'Pasif' => 0.5
+        ],
+        'keterangan_kriteria' => [
+            'Sudah mampu' => 1.0,
+            'Sedikit bisa' => 0.5,
+            'Belum bisa' => 0.25
+        ]
+    ];
+
     public function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Select::make('peserta_id')
                     ->label('Peserta')
-                    ->options(function () {
-                        $tahunAjaranId = $this->getOwnerRecord()->tahun_ajaran_id;
-                        
-                        // Debug: Cek data peserta untuk tahun ajaran tertentu
-                        // dd([
-                        //     'tahun_ajaran_id' => $tahunAjaranId,
-                        //     'peserta_check' => Peserta::with(['kodePendaftaran.pendaftaran'])
-                        //         ->where('status_peserta', 'diterima')
-                        //         ->get()
-                        //         ->map(function($peserta) {
-                        //             return [
-                        //                 'id' => $peserta->id,
-                        //                 'nama' => $peserta->nama,
-                        //                 'status' => $peserta->status_peserta,
-                        //                 'kode_pendaftaran' => $peserta->kodePendaftaran ? [
-                        //                     'id' => $peserta->kodePendaftaran->id,
-                        //                     'pendaftaran' => $peserta->kodePendaftaran->pendaftaran ? [
-                        //                         'id' => $peserta->kodePendaftaran->pendaftaran->id,
-                        //                         'tahun_ajaran_id' => $peserta->kodePendaftaran->pendaftaran->tahun_ajaran_id
-                        //                     ] : 'Tidak ada pendaftaran'
-                        //                 ] : 'Tidak ada kode pendaftaran'
-                        //             ];
-                        //         })->toArray(),
-                        //     'pendaftaran_tahun_2' => \App\Models\Pendaftaran::where('tahun_ajaran_id', $tahunAjaranId)
-                        //         ->with(['kodePendaftaran.peserta'])
-                        //         ->get()
-                        //         ->map(function($pendaftaran) {
-                        //             return [
-                        //                 'pendaftaran_id' => $pendaftaran->id,
-                        //                 'tahun_ajaran_id' => $pendaftaran->tahun_ajaran_id,
-                        //                 'kode_pendaftaran' => $pendaftaran->kodePendaftaran ? $pendaftaran->kodePendaftaran->map(function($kode) {
-                        //                     return [
-                        //                         'kode_id' => $kode->id,
-                        //                         'peserta' => $kode->peserta ? $kode->peserta->map(function($p) {
-                        //                             return [
-                        //                                 'peserta_id' => $p->id,
-                        //                                 'nama' => $p->nama,
-                        //                                 'status' => $p->status_peserta
-                        //                             ];
-                        //                         })->toArray() : 'Tidak ada peserta'
-                        //                     ];
-                        //                 })->toArray() : 'Tidak ada kode pendaftaran'
-                        //             ];
-                        //         })->toArray(),
-                        //     'raw_query' => \App\Models\Pendaftaran::where('tahun_ajaran_id', $tahunAjaranId)
-                        //         ->with(['kodePendaftaran.peserta'])
-                        //         ->get()
-                        //         ->toArray()
-                        // ]);
-
-                        $query = Peserta::where('status_peserta', 'diterima')
-                            ->whereHas('kodePendaftaran.pendaftaran', function (Builder $query) use ($tahunAjaranId) {
-                                $query->where('tahun_ajaran_id', $tahunAjaranId);
-                            })
-                            ->whereDoesntHave('kelasHasPeserta', function (Builder $query) use ($tahunAjaranId) {
-                                $query->whereHas('kelas', function (Builder $q) use ($tahunAjaranId) {
-                                    $q->where('tahun_ajaran_id', $tahunAjaranId);
-                                });
-                            });
-
-                        return $query->pluck('nama', 'id');
-                    })
+                    ->options(fn () => $this->getAvailablePesertaOptions())
                     ->searchable()
                     ->required(),
             ]);
+    }
+
+    private function getAvailablePesertaOptions(): array
+    {
+        $tahunAjaranId = $this->getOwnerRecord()->tahun_ajaran_id;
+        
+        return Peserta::where('status_peserta', 'diterima')
+            ->whereHas('kodePendaftaran.pendaftaran', function (Builder $query) use ($tahunAjaranId) {
+                $query->where('tahun_ajaran_id', $tahunAjaranId);
+            })
+            ->whereDoesntHave('kelasHasPeserta', function (Builder $query) use ($tahunAjaranId) {
+                $query->whereHas('kelas', function (Builder $q) use ($tahunAjaranId) {
+                    $q->where('tahun_ajaran_id', $tahunAjaranId);
+                });
+            })
+            ->pluck('nama', 'id')
+            ->toArray();
+    }
+
+    private function updateKelasStatus(): void
+    {
+        $kelas = $this->getOwnerRecord();
+        $status = $kelas->kelasHasPeserta()->count() >= $kelas->kapasitas ? 'penuh' : 'tersedia';
+        $kelas->update(['status' => $status]);
     }
 
     public function table(Table $table): Table
@@ -162,15 +144,24 @@ class KelasHasPesertaRelationManager extends RelationManager
                 Tables\Actions\Action::make('tambah_otomatis')
                     ->label('Tambah Otomatis')
                     ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Select::make('algoritma')
+                            ->label('Pilih Algoritma')
+                            ->options([
+                                'greedy' => 'Greedy (Berdasarkan Kriteria Akademik & Sosial)',
+                                'kmeans' => 'K-Means (Berdasarkan Umur)'
+                            ])
+                            ->required()
+                    ])
                     ->modalHeading('Tambah Peserta Otomatis')
-                    ->modalDescription('Sistem akan menambahkan peserta berdasarkan kriteria akademik dan sosial untuk memastikan keseimbangan kelas yang optimal.')
+                    ->modalDescription('Pilih algoritma yang akan digunakan untuk menambahkan peserta secara otomatis.')
                     ->modalSubmitActionLabel('Ya, Tambahkan')
                     ->visible(function () {
                         $kelas = $this->getOwnerRecord();
                         return $kelas->kelasHasPeserta()->count() < $kelas->kapasitas && 
                                auth()->user()->hasAnyRole(['Admin', 'Super_Admin']);
                     })
-                    ->action(function () {
+                    ->action(function (array $data) {
                         $kelas = $this->getOwnerRecord();
                         $kapasitasTersisa = min(30, $kelas->kapasitas - $kelas->kelasHasPeserta()->count());
                         
@@ -195,8 +186,9 @@ class KelasHasPesertaRelationManager extends RelationManager
                             })
                             ->get();
 
-                        // Gunakan algoritma greedy
-                        $pesertaSorted = $this->greedyPrioritization($pesertaAvailable, $kapasitasTersisa);
+                        $pesertaSorted = $data['algoritma'] === 'greedy' 
+                            ? $this->greedyPrioritization($pesertaAvailable, $kapasitasTersisa)
+                            : $this->kmeansPrioritization($pesertaAvailable, $kapasitasTersisa);
 
                         $jumlahDitambahkan = 0;
                         
@@ -286,128 +278,182 @@ class KelasHasPesertaRelationManager extends RelationManager
 
     private function greedyPrioritization($pesertaAvailable, $kapasitasTersisa)
     {
-        // Bobot untuk setiap kriteria
-        $weights = [
-            'pergaulan_dengan_sebaya' => 0.25,
-            'keterangan_membaca' => 0.25,
-            'keterangan_menulis' => 0.25,
-            'keterangan_menghitung' => 0.25
-        ];
-
-        // Nilai skor untuk setiap kategori
-        $scoreMap = [
-            'pergaulan_dengan_sebaya' => [
-                'Aktif' => 1.0,
-                'Pasif' => 0.5
-            ],
-            'keterangan_kriteria' => [
-                'Sudah mampu' => 1.0,
-                'Sedikit bisa' => 0.5,
-                'Belum bisa' => 0.25
-            ]
-        ];
-
-        // Hitung skor prioritas untuk setiap peserta
-        $pesertaScored = $pesertaAvailable->map(function ($peserta) use ($weights, $scoreMap) {
-            // Cek apakah informasi dan keterangan ada
+        $pesertaScored = $pesertaAvailable->map(function ($peserta) {
             if (!$peserta->informasi || !$peserta->keterangan) {
-                \Illuminate\Support\Facades\Log::warning('Data tidak lengkap untuk peserta:', [
-                    'peserta_id' => $peserta->id,
-                    'nama' => $peserta->nama,
-                    'informasi_exists' => !!$peserta->informasi,
-                    'keterangan_exists' => !!$peserta->keterangan
-                ]);
-                return [
-                    'peserta' => $peserta,
-                    'skor' => 0,
-                    'detail' => [
-                        'nama' => $peserta->nama,
-                        'error' => 'Data tidak lengkap'
-                    ]
-                ];
+                return $this->createEmptyScore($peserta);
             }
 
-            // Hitung skor pergaulan
-            $skorPergaulan = $scoreMap['pergaulan_dengan_sebaya'][$peserta->informasi->pergaulan_dengan_sebaya] ?? 0;
-            
-            // Hitung skor membaca
-            $skorMembaca = $scoreMap['keterangan_kriteria'][$peserta->keterangan->keterangan_membaca] ?? 0;
-            
-            // Hitung skor menulis
-            $skorMenulis = $scoreMap['keterangan_kriteria'][$peserta->keterangan->keterangan_menulis] ?? 0;
-            
-            // Hitung skor menghitung
-            $skorMenghitung = $scoreMap['keterangan_kriteria'][$peserta->keterangan->keterangan_menghitung] ?? 0;
+            $totalSkor = $this->calculateTotalScore($peserta);
+            return $this->createDetailedScore($peserta, $totalSkor);
+        });
 
-            // Hitung skor total dengan pembobotan
-            $totalSkor = ($weights['pergaulan_dengan_sebaya'] * $skorPergaulan) +
-                        ($weights['keterangan_membaca'] * $skorMembaca) +
-                        ($weights['keterangan_menulis'] * $skorMenulis) +
-                        ($weights['keterangan_menghitung'] * $skorMenghitung);
+        return $pesertaScored->sortByDesc('skor')
+            ->take($kapasitasTersisa)
+            ->map(fn($item) => $item['peserta']);
+    }
 
-            // Detail informasi untuk logging
-            $detailInfo = [
+    private function createEmptyScore($peserta)
+    {
+        return [
+            'peserta' => $peserta,
+            'skor' => 0,
+            'detail' => [
                 'nama' => $peserta->nama,
-                'skor_detail' => [
-                    'pergaulan' => [
-                        'nilai' => $peserta->informasi->pergaulan_dengan_sebaya,
-                        'skor' => $skorPergaulan,
-                        'bobot' => $weights['pergaulan_dengan_sebaya'],
-                        'nilai_akhir' => $skorPergaulan * $weights['pergaulan_dengan_sebaya']
-                    ],
-                    'membaca' => [
-                        'nilai' => $peserta->keterangan->keterangan_membaca,
-                        'skor' => $skorMembaca,
-                        'bobot' => $weights['keterangan_membaca'],
-                        'nilai_akhir' => $skorMembaca * $weights['keterangan_membaca']
-                    ],
-                    'menulis' => [
-                        'nilai' => $peserta->keterangan->keterangan_menulis,
-                        'skor' => $skorMenulis,
-                        'bobot' => $weights['keterangan_menulis'],
-                        'nilai_akhir' => $skorMenulis * $weights['keterangan_menulis']
-                    ],
-                    'menghitung' => [
-                        'nilai' => $peserta->keterangan->keterangan_menghitung,
-                        'skor' => $skorMenghitung,
-                        'bobot' => $weights['keterangan_menghitung'],
-                        'nilai_akhir' => $skorMenghitung * $weights['keterangan_menghitung']
-                    ],
+                'error' => 'Data tidak lengkap'
+            ]
+        ];
+    }
+
+    private function calculateTotalScore($peserta)
+    {
+        $skorPergaulan = self::SCORE_MAPPING['pergaulan_dengan_sebaya'][$peserta->informasi->pergaulan_dengan_sebaya] ?? 0;
+        
+        $skorMembaca = self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_membaca] ?? 0;
+        
+        $skorMenulis = self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_menulis] ?? 0;
+        
+        $skorMenghitung = self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_menghitung] ?? 0;
+
+        $totalSkor = (self::CRITERIA_WEIGHTS['pergaulan_dengan_sebaya'] * $skorPergaulan) +
+                    (self::CRITERIA_WEIGHTS['keterangan_membaca'] * $skorMembaca) +
+                    (self::CRITERIA_WEIGHTS['keterangan_menulis'] * $skorMenulis) +
+                    (self::CRITERIA_WEIGHTS['keterangan_menghitung'] * $skorMenghitung);
+
+        return $totalSkor;
+    }
+
+    private function createDetailedScore($peserta, $totalSkor)
+    {
+        $detailInfo = [
+            'nama' => $peserta->nama,
+            'skor_detail' => [
+                'pergaulan' => [
+                    'nilai' => $peserta->informasi->pergaulan_dengan_sebaya,
+                    'skor' => self::SCORE_MAPPING['pergaulan_dengan_sebaya'][$peserta->informasi->pergaulan_dengan_sebaya] ?? 0,
+                    'bobot' => self::CRITERIA_WEIGHTS['pergaulan_dengan_sebaya'],
+                    'nilai_akhir' => self::CRITERIA_WEIGHTS['pergaulan_dengan_sebaya'] * (self::SCORE_MAPPING['pergaulan_dengan_sebaya'][$peserta->informasi->pergaulan_dengan_sebaya] ?? 0)
                 ],
-                'total_skor' => $totalSkor
-            ];
+                'membaca' => [
+                    'nilai' => $peserta->keterangan->keterangan_membaca,
+                    'skor' => self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_membaca] ?? 0,
+                    'bobot' => self::CRITERIA_WEIGHTS['keterangan_membaca'],
+                    'nilai_akhir' => self::CRITERIA_WEIGHTS['keterangan_membaca'] * (self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_membaca] ?? 0)
+                ],
+                'menulis' => [
+                    'nilai' => $peserta->keterangan->keterangan_menulis,
+                    'skor' => self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_menulis] ?? 0,
+                    'bobot' => self::CRITERIA_WEIGHTS['keterangan_menulis'],
+                    'nilai_akhir' => self::CRITERIA_WEIGHTS['keterangan_menulis'] * (self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_menulis] ?? 0)
+                ],
+                'menghitung' => [
+                    'nilai' => $peserta->keterangan->keterangan_menghitung,
+                    'skor' => self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_menghitung] ?? 0,
+                    'bobot' => self::CRITERIA_WEIGHTS['keterangan_menghitung'],
+                    'nilai_akhir' => self::CRITERIA_WEIGHTS['keterangan_menghitung'] * (self::SCORE_MAPPING['keterangan_kriteria'][$peserta->keterangan->keterangan_menghitung] ?? 0)
+                ],
+            ],
+            'total_skor' => $totalSkor
+        ];
 
-            \Illuminate\Support\Facades\Log::info('Detail Skor Peserta:', $detailInfo);
+        \Illuminate\Support\Facades\Log::info('Detail Skor Peserta:', $detailInfo);
 
+        return [
+            'peserta' => $peserta,
+            'skor' => $totalSkor,
+            'detail' => $detailInfo
+        ];
+    }
+
+    private function kmeansPrioritization($pesertaAvailable, $kapasitasTersisa)
+    {
+        // Jika tidak ada peserta yang tersedia, return collection kosong
+        if ($pesertaAvailable->isEmpty()) {
+            return collect();
+        }
+
+        // Ekstrak umur peserta
+        $pesertaWithAge = $pesertaAvailable->map(function ($peserta) {
             return [
                 'peserta' => $peserta,
-                'skor' => $totalSkor,
-                'detail' => $detailInfo
+                'umur' => \Carbon\Carbon::parse($peserta->tanggal_lahir)->age
             ];
         });
 
-        // Urutkan dan ambil peserta sesuai kapasitas
-        $pesertaSorted = $pesertaScored->sortByDesc('skor')
-            ->take($kapasitasTersisa)
-            ->map(function ($item) {
-                return $item['peserta'];
-            });
+        // Tentukan jumlah cluster (k) berdasarkan kapasitas
+        $k = min(3, ceil($kapasitasTersisa / 10)); // Maksimal 3 cluster
+        
+        // Pastikan k minimal 1
+        $k = max(1, $k);
 
-        // Log hasil akhir pengurutan
-        \Illuminate\Support\Facades\Log::info('Hasil Akhir Pengurutan:', [
-            'jumlah_peserta_terpilih' => $pesertaSorted->count(),
-            'detail_urutan' => $pesertaScored
-                ->sortByDesc('skor')
-                ->take($kapasitasTersisa)
-                ->map(function ($item) {
-                    return [
-                        'nama' => $item['peserta']->nama,
-                        'total_skor' => $item['skor'],
-                        'detail_nilai' => $item['detail']['skor_detail']
-                    ];
-                })->toArray()
-        ]);
+        // Inisialisasi centroid awal (random)
+        $umurMin = $pesertaWithAge->min('umur');
+        $umurMax = $pesertaWithAge->max('umur');
+        $centroids = collect();
+        
+        // Hindari pembagian dengan nol jika k = 1
+        if ($k === 1) {
+            $centroids->push($umurMin);
+        } else {
+            for ($i = 0; $i < $k; $i++) {
+                $centroids->push($umurMin + ($i * ($umurMax - $umurMin) / ($k - 1)));
+            }
+        }
 
-        return $pesertaSorted;
+        // Iterasi maksimal untuk k-means
+        $maxIterations = 100;
+        $iteration = 0;
+        $previousCentroids = null;
+
+        // K-means clustering
+        do {
+            // Assign setiap peserta ke cluster terdekat
+            $clusters = collect(array_fill(0, $k, collect()));
+            
+            foreach ($pesertaWithAge as $data) {
+                $minDistance = PHP_FLOAT_MAX;
+                $clusterIndex = 0;
+                
+                for ($i = 0; $i < $k; $i++) {
+                    $distance = abs($data['umur'] - $centroids[$i]);
+                    if ($distance < $minDistance) {
+                        $minDistance = $distance;
+                        $clusterIndex = $i;
+                    }
+                }
+                
+                $clusters[$clusterIndex]->push($data);
+            }
+
+            // Simpan centroid sebelumnya untuk cek konvergensi
+            $previousCentroids = collect($centroids->all());
+
+            // Update centroid
+            for ($i = 0; $i < $k; $i++) {
+                if ($clusters[$i]->isNotEmpty()) {
+                    $centroids[$i] = $clusters[$i]->average('umur');
+                }
+            }
+
+            $iteration++;
+        } while (!$previousCentroids->every(fn($value, $key) => abs($value - $centroids[$key]) < 0.0001) && $iteration < $maxIterations);
+
+        // Urutkan cluster berdasarkan rata-rata umur
+        $sortedClusters = $clusters->sortBy(function ($cluster) {
+            return $cluster->average('umur');
+        });
+
+        // Ambil peserta dari setiap cluster secara merata
+        $selectedPeserta = collect();
+        $pesertaPerCluster = ceil($kapasitasTersisa / $k);
+
+        foreach ($sortedClusters as $cluster) {
+            $clusterPeserta = $cluster->take($pesertaPerCluster);
+            $selectedPeserta = $selectedPeserta->concat($clusterPeserta);
+        }
+
+        // Ambil hanya sejumlah kapasitas yang tersisa
+        return $selectedPeserta->take($kapasitasTersisa)->map(function ($data) {
+            return $data['peserta'];
+        });
     }
 }
