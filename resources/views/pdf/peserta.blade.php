@@ -8,44 +8,122 @@
             font-family: Arial, sans-serif;
             line-height: 1.6;
             margin: 20px;
+            color: #333;
         }
+        
         .header {
             text-align: center;
             margin-bottom: 30px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 20px;
         }
-        .section {
-            margin-bottom: 20px;
-        }
+        
         .header img {
-            width: 100px; /* Ganti dengan ukuran logo yang sesuai */
+            width: 120px;
+            margin-bottom: 15px;
         }
+        
         .title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        
+        .section {
+            margin: 25px 0;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        
+        .section-title {
             font-size: 18px;
             font-weight: bold;
-            margin-top: 10px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
         }
-        .section {
-            margin-top: 20px;
-            border: 1px solid #000;
-            padding: 10px;
-        }
+        
         .field {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
         }
+        
         .label {
             font-weight: bold;
+            color: #2c3e50;
+            min-width: 200px;
+            margin-right: 10px;
         }
+        
+        .subsection {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
+            margin: 15px 0;
         }
+        
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border: 1px solid #dee2e6;
+            padding: 12px;
             text-align: left;
         }
-        .page-break {
-            page-break-after: always;
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+        
+        .signature-section {
+            margin-top: 30px;
+        }
+        
+        .signature-box {
+            text-align: center;
+            margin: 15px;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin: 10px auto;
+        }
+        
+        /* Styling untuk informasi penting */
+        .important-info {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+        
+        /* Styling untuk data kesehatan */
+        .health-info {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 10px 15px;
+            margin: 10px 0;
         }
     </style>
 </head>

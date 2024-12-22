@@ -625,10 +625,21 @@ class PesertaResource extends Resource
                         ->required()
                         ->label('Pembantu Rumah Tangga')
                         ->maxLength(255),
-                    Forms\Components\Textarea::make('informasi.peralatan_elektronik')
-                        ->required()
-                        ->label('Peralatan Elektronik')
-                        ->maxLength(255),
+                    // ... existing code ...
+                    Forms\Components\Select::make('informasi.peralatan_elektronik')
+                    ->multiple()
+                    ->searchable()
+                    ->preload()
+                    ->label('Peralatan Elektronik yang Dimiliki')
+                    ->options([
+                        'Televisi' => 'Televisi',
+                        'Smartphone' => 'Smartphone',
+                        'Laptop' => 'Laptop',
+                        'Kamera Digital' => 'Kamera Digital',
+                    ])
+                    ->required()
+                    ->helperText('Pilih satu atau lebih peralatan elektronik yang dimiliki')
+                    ->columnSpanFull()
                 ])
             ]),
             Forms\Components\Wizard\Step::make('Data Keterangan Peserta')
