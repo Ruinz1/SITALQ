@@ -898,7 +898,8 @@ class PesertaResource extends Resource
                     ->icon('heroicon-o-printer')
                     ->color('info')
                     ->url(fn (Peserta $record) => route('peserta.print', $record->id))
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()
+                    ->visible(fn (Peserta $record): bool => $record->status_peserta === 'diterima'),
                 Tables\Actions\Action::make('Terima')
                     ->icon('heroicon-o-check')
                     ->color('success')

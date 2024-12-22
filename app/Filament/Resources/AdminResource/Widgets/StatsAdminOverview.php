@@ -48,6 +48,11 @@ class StatsAdminOverview extends BaseWidget
                 ->description('Total peserta pendaftaran')
                 ->descriptionIcon('heroicon-o-user-group')
                 ->color('success'),
+
+            Stat::make('Total Siswa', Peserta::where('status_peserta', 'diterima')->count())
+                ->description('Jumlah Siswa')
+                ->descriptionIcon('heroicon-o-user-group')
+                ->color('success'),
                 
             Stat::make('Pendaftaran', function () {
                 $pendaftaran = Pendaftaran::where('status', '1')->first();
