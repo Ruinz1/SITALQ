@@ -638,6 +638,7 @@ class PesertaResource extends Resource
                         'Kamera Digital' => 'Kamera Digital',
                     ])
                     ->required()
+                    ->default([])
                     ->helperText('Pilih satu atau lebih peralatan elektronik yang dimiliki')
                     ->columnSpanFull()
                 ])

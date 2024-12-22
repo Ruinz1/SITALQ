@@ -12,6 +12,7 @@ class InformasiPeserta extends Model
 {
     use HasFactory, SoftDeletes;
 
+
     protected $fillable = [
         'tinggal_bersama',
         'jumlah_penghuni_dewasa',
@@ -36,6 +37,10 @@ class InformasiPeserta extends Model
         'sifat_buruk',
         'pembantu_rumah_tangga',
         'peralatan_elektronik',
+    ];
+
+    protected $casts = [
+        'peralatan_elektronik' => 'array'
     ];
 
     public function peserta(): HasOne

@@ -459,7 +459,17 @@
                 </label>
                 <label class="flex flex-col gap-[10px] font-semibold">
                     <span class="text-white">Alat Elektronik di Rumah</span>
-                    <textarea name="peralatan_elektronik" id="peralatan_elektronik" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan hal-hal yang perlu dicatat atau dikemukakan pada waktu tidur anak"></textarea>
+                    <select name="peralatan_elektronik[]" id="peralatan_elektronik" class="bg-white rounded-[20px] p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" multiple required>
+                        <option value="Televisi">Televisi</option>
+                        <option value="Radio">Radio</option>
+                        <option value="Komputer/Laptop">Komputer/Laptop</option>
+                        <option value="Smartphone">Smartphone</option>
+                        <option value="Tablet">Tablet</option>
+                        <option value="Game Console">Game Console</option>
+                        <option value="Smart TV">Smart TV</option>
+                        <option value="Speaker Bluetooth">Speaker Bluetooth</option>
+                    </select>
+                    <p class="text-white text-sm mt-1">* Tekan CTRL (Windows) atau Command (Mac) untuk memilih lebih dari satu</p>
                 </label>
                 <div class="flex justify-between mt-12">
                     <button type="button" class="prev-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Previous</button>

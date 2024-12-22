@@ -167,7 +167,7 @@ class PesertaController extends Controller
                 'sifat_baik' => $request->sifat_baik,
                 'sifat_buruk' => $request->sifat_buruk,
                 'pembantu_rumah_tangga' => $request->pembantu_rumah_tangga,
-                'peralatan_elektronik' => $request->peralatan_elektronik,
+                'peralatan_elektronik' => json_encode($request->peralatan_elektronik),
             ]);
 
             // 6. Buat data Keterangan Peserta
