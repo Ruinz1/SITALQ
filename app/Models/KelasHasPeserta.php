@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Penilaian;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class KelasHasPeserta extends Model
@@ -24,5 +26,10 @@ class KelasHasPeserta extends Model
     public function peserta(): BelongsTo
     {
         return $this->belongsTo(Peserta::class);
+    }
+
+    public function penilaian(): HasMany
+    {
+        return $this->hasMany(Penilaian::class);
     }
 }

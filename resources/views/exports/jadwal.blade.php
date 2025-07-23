@@ -38,15 +38,16 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($jadwal as $item)
+            {{-- @foreach($jadwal as $item)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td>{{ $item->guru->mapel->nama }}</td>
-                <td>{{ $item->guru->nama }}</td>
+                <td>{{ $item->guru->mapel->nama ?? '-' }}</td>
+                <td>{{ $item->guru->nama ?? '-' }}</td>
                 <td>{{ $item->hari }}, {{ $item->jam }}</td>
-                <td>{{ $item->kelas->nama_kelas }}</td>
+                <td>{{ $item->kelas->nama_kelas ?? '-' }}</td>
+
             </tr>
-            @endforeach
+            @endforeach --}}
         </tbody>
     </table>
 </body>

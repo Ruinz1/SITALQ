@@ -24,12 +24,12 @@ class KelasPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole(['Super_Admin', 'Admin']);
+        return $user->hasRole(['Super_Admin', 'Admin', 'Guru']);
     }
 
     public function update(User $user): bool
     {
-        return $user->hasRole(['Super_Admin', 'Admin']);
+        return $user->hasRole(['Super_Admin', 'Admin', 'Guru']);
     }
 
     public function delete(User $user): bool

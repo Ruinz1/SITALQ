@@ -2,12 +2,13 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Mapel;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Mapel;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -71,9 +72,12 @@ class MapelResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
+                    Tables\Actions\ForceDeleteBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
                 ]),
             ]);
     }

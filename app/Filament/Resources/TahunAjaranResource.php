@@ -65,7 +65,7 @@ class TahunAjaranResource extends Resource
                         '0' => 'danger',
                         default => 'gray',
                     })
-                    ->label('Status Pendaftaran'),
+                    ->label('Status Ajaran'),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),

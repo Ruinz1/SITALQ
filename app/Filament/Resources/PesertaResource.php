@@ -31,8 +31,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PesertaResource extends Resource
 {
     protected static ?string $model = Peserta::class;
-    protected static ?string $pluralModelLabel = 'Peserta';
-    protected static ?string $modelLabel = 'Peserta';
+    protected static ?string $pluralModelLabel = 'Siswa';
+    protected static ?string $modelLabel = 'Siswa';
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
@@ -208,17 +208,15 @@ class PesertaResource extends Resource
                                     ->columnSpanFull(),
                                
                                     Forms\Components\TextInput::make('berat_badan')
-                                    ->required()
                                     ->numeric()
-                                    ->minValue(1)
+                                    ->minValue(0)
                                     ->label('Berat Badan (kg)')
                                     ->validationMessages([
                                         'min' => 'Berat badan tidak boleh kurang dari 1 kg',
                                     ]),
                                 Forms\Components\TextInput::make('tinggi_badan')
-                                    ->required()
                                     ->numeric()
-                                    ->minValue(1)
+                                    ->minValue(0)
                                     ->label('Tinggi Badan (cm)')
                                     ->validationMessages([
                                         'min' => 'Tinggi badan tidak boleh kurang dari 1 cm',
@@ -273,8 +271,7 @@ class PesertaResource extends Resource
                                     ->required(),
                                 Forms\Components\FileUpload::make('ttd_ortu')
                                     ->label('TTD Orang Tua')
-                                    ->image()
-                                    ->required(),
+                                    ->image(),
                                 Forms\Components\Select::make('is_pindahan')
                                     ->label('Masuk TK ini Sebagai ')
                                     ->live()
@@ -333,9 +330,9 @@ class PesertaResource extends Resource
                                     ->label('Berapa Lama Berencana Menyekolahkan Anak di TKIT AL-Qolam')
                                     ->required()
                                     ->options([
-                                        '1 Tahun' => '1 Tahun',
-                                        '2 Tahun' => '2 Tahun',
-                                        '3 Tahun' => '3 Tahun',
+                                        '1' => '1 Tahun',
+                                        '2' => '2 Tahun',
+                                        '3' => '3 Tahun',
                                     ]),
                             ]),
                     ]),
@@ -777,9 +774,9 @@ class PesertaResource extends Resource
                                         ->required()
                                         ->label('Pemasukan Perbulan Orang Tua')
                                         ->options([
-                                            'Rp 500.000 < Rp. 1.500.000' => 'Rp 500.000 < Rp. 1.500.000',
-                                            'Rp. 1.500.000 < Rp. 2.500.000' => 'Rp. 1.500.000 < Rp. 2.500.000',
-                                            '> Rp. 2.500.000' => '> Rp. 2.500.000',
+                                            '1' => 'Rp 500.000 < Rp. 1.500.000',
+                                            '2' => 'Rp. 1.500.000 < Rp. 2.500.000',
+                                            '3' => '> Rp. 2.500.000',
                                         ]),
                                     Forms\Components\Textarea::make('pendanaan.keterangan_kenaikan_pendapatan')
                                         ->required()
@@ -801,16 +798,16 @@ class PesertaResource extends Resource
                                         ->label('Setuju atau tidak setuju, untuk menghadiri pertemuan wali murid 2 bulan sekali '),
                                     Forms\Components\Textarea::make('survei.kontrol_pengembangan')
                                         ->required()
-                                        ->label('Setuju atau tidak setuju, untuk  '),
+                                        ->label('Setuju atau tidak setuju, untuk melakukan kontrol perkembangan tiap 2 bulan sekali (berikan alasan) '),
                                     Forms\Components\Textarea::make('survei.larangan_merokok')
                                         ->required()
-                                        ->label('Setuju atau tidak setuju, untuk  '),
+                                        ->label('Setuju atau tidak setuju, untuk tidak merokok di lingkungan TKIT AL-Qolam (berikan alasan) '),
                                     Forms\Components\Textarea::make('survei.tidak_bekerjasama')
                                         ->required()
-                                        ->label('Setuju atau tidak setuju, untuk  '),
+                                        ->label('Setuju atau tidak setuju, untuk tidak bekerja sama dengan orang lain di lingkungan TKIT AL-Qolam (berikan alasan) '),
                                     Forms\Components\Textarea::make('survei.penjadwalan')
                                         ->required()
-                                        ->label('Setuju atau tidak setuju, untuk  '),
+                                        ->label('Setuju atau tidak setuju, untuk melakukan penjadwalan tiap 2 bulan sekali (berikan alasan) '),
                                     
                                     
 
@@ -874,6 +871,30 @@ class PesertaResource extends Resource
                         default => 'heroicon-o-x-circle',
                     })
                     ->label('Status Peserta'),
+                Tables\Columns\TextColumn::make('transaksi.status_pembayaran')
+                    ->label('Status Pembayaran')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        '1' => 'Sukses',
+                        '0' => 'Pending',
+                        '2' => 'Gagal',
+                        '3' => 'Expired',
+                        default => 'Unknown'
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        '1' => 'success',
+                        '0' => 'warning',
+                        '2' => 'danger',
+                        '3' => 'gray',
+                        default => 'gray'
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        '1' => 'heroicon-o-check-circle',
+                        '0' => 'heroicon-o-clock',
+                        '2' => 'heroicon-o-x-circle',
+                        '3' => 'heroicon-o-x-mark',
+                        default => 'heroicon-o-question-mark-circle'
+                    }),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
@@ -917,7 +938,18 @@ class PesertaResource extends Resource
                         }
                     })
                     ->requiresConfirmation()
-                    ->visible(fn (Peserta $record): bool => $record->status_peserta === 'pending')
+                    ->visible(function (Peserta $record): bool {
+                        // Debug log
+                        \Log::info('Checking visibility for Terima button', [
+                            'peserta_id' => $record->id,
+                            'status_peserta' => $record->status_peserta,
+                            'transaksi' => $record->transaksi,
+                            'status_pembayaran' => $record->transaksi?->status_pembayaran
+                        ]);
+                        
+                        return $record->status_peserta === 'pending' && 
+                               $record->transaksi?->status_pembayaran === "1";
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -1021,7 +1053,8 @@ class PesertaResource extends Resource
                 'informasi',
                 'keterangan',
                 'pendanaan',    
-                'survei'
+                'survei',
+                'transaksi'
             ]);
     }
 
@@ -1102,8 +1135,15 @@ class PesertaResource extends Resource
             ->send();
     }
 
-  
-   
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status_peserta', 'pending')->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
 }
 
   

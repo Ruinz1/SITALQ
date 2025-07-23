@@ -18,7 +18,7 @@ class FrontService
 
     public function getJadwal()
     {
-        $jadwal = jadwal::all();
+        $jadwal = jadwal::with(['guru.mapel', 'kelas'])->get();
         return compact('jadwal');
     }
 

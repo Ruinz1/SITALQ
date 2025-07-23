@@ -23,7 +23,7 @@ class KelasHasPesertaRelationManager extends RelationManager
 {
     protected static string $relationship = 'kelasHasPeserta';
 
-    protected static ?string $title = 'Peserta Kelas';
+    protected static ?string $title = 'Siswa';
 
     private const CRITERIA_WEIGHTS = [
         'pergaulan_dengan_sebaya' => 0.25,
@@ -92,8 +92,7 @@ class KelasHasPesertaRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('peserta.nama')
                     ->label('Nama Peserta')
                     ->searchable(),
-                
-                    
+            
             ])
             ->filters([
                 //

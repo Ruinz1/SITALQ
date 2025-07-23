@@ -165,4 +165,9 @@ class Peserta extends Model
         });
     }
 
+    public function transaksi()
+    {
+        return $this->hasOne(Transaksi::class);
+    }
+
 }

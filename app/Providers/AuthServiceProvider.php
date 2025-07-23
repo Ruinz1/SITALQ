@@ -8,18 +8,23 @@ use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\jadwal;
 use App\Models\Peserta;
+use App\Models\transaksi;
 use App\Models\Pendaftaran;
 use App\Models\TahunAjaran;
 use App\Policies\GuruPolicy;
+use App\Policies\PaguPolicy;
 use App\Policies\UserPolicy;
+use App\Models\Pagu_anggaran;
 use App\Policies\KelasPolicy;
 use App\Policies\MapelPolicy;
 use App\Policies\RolesPolicy;
 use App\Policies\JadwalPolicy;
 use App\Policies\MapelsPolicy;
 use App\Models\KelasHasPeserta;
+use App\Policies\KasPolicy;
 use App\Policies\PesertaPolicy;
 use App\Policies\PermisionPolicy;
+use App\Policies\TransaksiPolicy;
 use Spatie\Permission\Models\Role;
 use App\Policies\PendaftaranPolicy;
 use App\Policies\TahunAjaranPolicy;
@@ -46,6 +51,9 @@ class AuthServiceProvider extends ServiceProvider
         Peserta::class => PesertaPolicy::class,
         jadwal::class => JadwalPolicy::class,
         KelasHasPeserta::class => KelasHasPesertaPolicy::class,
+        transaksi::class => TransaksiPolicy::class,
+        Pagu_anggaran::class => PaguPolicy::class,
+        KasPolicy::class => KasPolicy::class
     ];
 
     /**

@@ -47,4 +47,18 @@ class FrontController extends Controller
         
         return view('front.daftar');
     }
+
+    public function pembayaran(Request $request)
+    {
+        $kodeTransaksi = $request->query('kode');
+        $transaksi = null;
+        
+        if ($kodeTransaksi) {
+            $transaksi = \App\Models\Transaksi::where('kode_transaksi', $kodeTransaksi)
+                ->with('peserta')
+                ->first();
+        }
+        
+        return view('front.pembayaran', compact('transaksi'));
+    }
 }

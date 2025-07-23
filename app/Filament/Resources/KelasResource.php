@@ -2,16 +2,17 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\KelasResource\Pages;
-use App\Filament\Resources\KelasResource\RelationManagers;
-use App\Models\Kelas;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Kelas;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\KelasResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\KelasResource\RelationManagers;
 
 class KelasResource extends Resource
 {
@@ -109,9 +110,12 @@ class KelasResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
+                    Tables\Actions\ForceDeleteBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
                 ]),
             ]);
     }
@@ -120,6 +124,7 @@ class KelasResource extends Resource
     {
         return [
             RelationManagers\KelasHasPesertaRelationManager::class,
+            RelationManagers\KelasHasPenilaianRelationManager::class,
         ];
     }
 
@@ -128,7 +133,6 @@ class KelasResource extends Resource
         return [
             'index' => Pages\ListKelas::route('/'),
             'create' => Pages\CreateKelas::route('/create'),
-            'view' => Pages\ViewKelas::route('/{record}'),
             'edit' => Pages\EditKelas::route('/{record}/edit'),
         ];
     }
@@ -139,5 +143,28 @@ class KelasResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $user = Auth::user();
+        // Jika bukan guru, tidak perlu badge
+        if (!$user->hasRole('Guru')) {
+            return null;
+        }
+        $guru = \App\Models\Guru::where('user_id', $user->id)->first();
+        if (!$guru) {
+            return null;
+        }
+        // Hitung jumlah penilaian pending untuk mapel guru ini
+        $pendingCount = \App\Models\Penilaian::where('status', 'pending')
+            ->where('mapel_id', $guru->mapel_id)
+            ->count();
+        return $pendingCount > 0 ? (string) $pendingCount : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
     }
 }

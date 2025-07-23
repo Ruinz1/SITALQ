@@ -17,6 +17,8 @@ use App\Models\Pendahuluan;
 use Illuminate\Support\Facades\DB;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\PesertaResource;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TransactionCreatedMail;
 
 class CreatePeserta extends \Filament\Resources\Pages\CreateRecord
 {
@@ -199,8 +201,40 @@ class CreatePeserta extends \Filament\Resources\Pages\CreateRecord
             // Tambahkan logging untuk debug peserta
             \Log::info('Peserta created:', ['peserta_id' => $peserta->id]);
 
-            // Simpan data pendahuluan dengan logging
-            
+            // Buat transaksi jika status peserta masih pending
+            if ($data['status_peserta'] === 'pending') {
+                // Tentukan total bayar berdasarkan pemasukan perbulan
+                $biayaPerBulan = match($data['pendanaan']['pemasukan_perbulan_orang_tua']) {
+                    '1' => 500000,
+                    '2' => 750000,
+                    '3' => 1000000,
+                    default => 500000,
+                };
+
+                // Hitung total bayar berdasarkan lama bersekolah
+                $lamaBersekolah = (int) $data['berapa_lama_bersekolah'];
+                $totalBayar = $biayaPerBulan * $lamaBersekolah;
+
+                $kodeTransaksi = 'TRX-' . time() . '-' . $peserta->id;
+                
+                // Buat transaksi
+                $transaksi = \App\Models\Transaksi::create([
+                    'peserta_id' => $peserta->id,
+                    'tahun_masuk' => $peserta->tahun_ajaran_masuk,
+                    'total_bayar' => $totalBayar,
+                    'status_pembayaran' => 0,
+                    'kode_transaksi' => $kodeTransaksi,
+                    'midtrans_transaction_id' => null,
+                    'midtrans_payment_type' => null,
+                ]);
+
+                // Kirim email
+                Mail::to($peserta->email)->send(new TransactionCreatedMail(
+                    $peserta,
+                    $kodeTransaksi,
+                    $totalBayar
+                ));
+            }
 
             DB::commit();
             return $peserta;

@@ -16,6 +16,8 @@ use App\Models\KeteranganPeserta;
 use App\Models\Saudara;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TransactionCreatedMail;
 
 class PesertaController extends Controller
 {
@@ -167,7 +169,7 @@ class PesertaController extends Controller
                 'sifat_baik' => $request->sifat_baik,
                 'sifat_buruk' => $request->sifat_buruk,
                 'pembantu_rumah_tangga' => $request->pembantu_rumah_tangga,
-                'peralatan_elektronik' => json_encode($request->peralatan_elektronik),
+                'peralatan_elektronik' =>  json_encode(array_values(array_unique($request->peralatan_elektronik))),
             ]);
 
             // 6. Buat data Keterangan Peserta
@@ -255,6 +257,41 @@ class PesertaController extends Controller
                 'umur' => $request->umur_saudara,
             ]);
 
+            // Setelah membuat peserta, tambahkan pembuatan transaksi
+            if ($peserta->status_peserta === 'pending') {
+                // Tentukan total bayar berdasarkan pemasukan perbulan
+                $biayaPerBulan = match($request->pemasukan_perbulan_orang_tua) {
+                    '1' => 500000,
+                    '2' => 750000,
+                    '3' => 1000000,
+                    default => 500000,
+                };
+
+                // Hitung total bayar berdasarkan lama bersekolah
+                $lamaBersekolah = (int) $request->berapa_lama_bersekolah;
+                $totalBayar = $biayaPerBulan * $lamaBersekolah;
+
+                $kodeTransaksi = 'TRX-' . time() . '-' . $peserta->id;
+                
+                // Buat transaksi
+                $transaksi = \App\Models\Transaksi::create([
+                    'peserta_id' => $peserta->id,
+                    'tahun_masuk' => $peserta->tahun_ajaran_masuk,
+                    'total_bayar' => $totalBayar,
+                    'status_pembayaran' => 0,
+                    'kode_transaksi' => $kodeTransaksi,
+                    'midtrans_transaction_id' => null,
+                    'midtrans_payment_type' => null,
+                ]);
+
+                // Kirim email notifikasi
+                Mail::to($peserta->email)->send(new TransactionCreatedMail(
+                    $peserta,
+                    $kodeTransaksi,
+                    $totalBayar
+                ));
+            }
+
             // Update status kode pendaftaran menjadi sudah digunakan
             // $kodePendaftaran->update(['status' => 0]); // Asumsikan 0 = sudah digunakan
 
@@ -263,6 +300,8 @@ class PesertaController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
+            
+
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()

@@ -19,6 +19,8 @@ use Filament\Actions\Exports\Models\Export;
 use App\Filament\Resources\JadwalResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\JadwalResource\RelationManagers;
+use Illuminate\Support\Facades\Auth;
+use App\Policies\JadwalPolicy;
 
 class JadwalResource extends Resource
 {
@@ -131,10 +133,12 @@ class JadwalResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                   
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
+                    Tables\Actions\ForceDeleteBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->visible(fn () => Auth::user()->hasRole(['Super_Admin', 'Admin'])),
                 ]),
             ])
             ->headerActions([

@@ -30,6 +30,18 @@ class Kelas extends Model
         return $this->hasMany(KelasHasPeserta::class);
     }
 
+    public function kelasHasPenilaian()
+    {
+        return $this->hasManyThrough(
+            \App\Models\Penilaian::class,
+            \App\Models\KelasHasPeserta::class,
+            'kelas_id', // Foreign key di kelas_has_peserta
+            'kelas_has_peserta_id', // Foreign key di penilaians
+            'id', // Local key di kelas
+            'id' // Local key di kelas_has_peserta
+        );
+    }
+
     public function tahunAjaran(): BelongsTo
     {
         return $this->belongsTo(TahunAjaran::class);

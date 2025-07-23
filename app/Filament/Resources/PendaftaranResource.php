@@ -59,7 +59,7 @@ class PendaftaranResource extends Resource
                     ->sortable(),
                     Tables\Columns\TextColumn::make('kode_pendaftaran_count')
                         ->counts('kodePendaftaran')
-                        ->label('Jumlah Kode')
+                        ->label('Jumlah Pendaftar')
                         ->sortable(),
                     Tables\Columns\TextColumn::make('status')
                     ->badge()

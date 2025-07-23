@@ -158,27 +158,27 @@
             <div class="step-content hidden" data-step="2">
                     <label class="flex flex-col gap-[10px] font-semibold">
                         <span class="text-white">Latar Belakang Mendaftarkan Anak ke TKIT AL-Qolam</span>
-                        <input type="textarea" name="latar_belakang" id="latar_belakang" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan memiliki alergi">
+                        <input type="textarea" name="latar_belakang" id="latar_belakang" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan Latar Belakang">
                     </label>
                     <label class="flex flex-col gap-[10px] font-semibold">
                         <span class="text-white">Apa Harapan Bapak/Ibu Mendaftarkan anak ke TKIT AL-Qolam dalam Bidang Keislaman</span>
-                        <input type="textarea" name="harapan_keislaman" id="harapan_keislaman" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan memiliki alergi">
+                        <input type="textarea" name="harapan_keislaman" id="harapan_keislaman" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan Harapan Keislaman">
                     </label>
                     <label class="flex flex-col gap-[10px] font-semibold">
                         <span class="text-white">Apa Harapan Bapak/Ibu Mendaftarkan anak ke TKIT AL-Qolam dalam Bidang Keilmuan</span>
-                        <input type="textarea" name="harapan_keilmuan" id="harapan_keilmuan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan memiliki alergi">
+                        <input type="textarea" name="harapan_keilmuan" id="harapan_keilmuan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan Harapan Keilmuan">
                     </label>
                     <label class="flex flex-col gap-[10px] font-semibold">
                         <span class="text-white">Apa Harapan Bapak/Ibu Mendaftarkan anak ke TKIT AL-Qolam dalam Bidang Sosial</span>
-                        <input type="textarea" name="harapan_sosial" id="harapan_sosial" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan memiliki alergi">
+                        <input type="textarea" name="harapan_sosial" id="harapan_sosial" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan Harapan Sosial">
                     </label>
                     <label class="flex flex-col gap-[10px] font-semibold col-span-2">
                         <span class="text-white">Berapa Lama Bapak/Ibu Berencana Menyekolahkan Anak di TKIT AL-Qolam ?</span>
                         <select name="berapa_lama_bersekolah" id="berapa_lama_bersekolah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
                             <option value="" selected disabled>Pilih opsi</option>
-                            <option value="1 tahun">1 Tahun</option>
-                            <option value="2 tahun">2 Tahun</option>
-                            <option value="3 tahun">3 Tahun</option>
+                            <option value="1">1 Tahun</option>
+                            <option value="2">2 Tahun</option>
+                            <option value="3">3 Tahun</option>
                         </select>
                     </label>
                 <div class="flex justify-between mt-12">
@@ -461,13 +461,9 @@
                     <span class="text-white">Alat Elektronik di Rumah</span>
                     <select name="peralatan_elektronik[]" id="peralatan_elektronik" class="bg-white rounded-[20px] p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" multiple required>
                         <option value="Televisi">Televisi</option>
-                        <option value="Radio">Radio</option>
-                        <option value="Komputer/Laptop">Komputer/Laptop</option>
                         <option value="Smartphone">Smartphone</option>
-                        <option value="Tablet">Tablet</option>
-                        <option value="Game Console">Game Console</option>
-                        <option value="Smart TV">Smart TV</option>
-                        <option value="Speaker Bluetooth">Speaker Bluetooth</option>
+                        <option value="Laptop">Laptop</option>
+                        <option value="Kamera Digital">Kamera Digital</option>
                     </select>
                     <p class="text-white text-sm mt-1">* Tekan CTRL (Windows) atau Command (Mac) untuk memilih lebih dari satu</p>
                 </label>
@@ -608,9 +604,9 @@
                     <span class="text-white">Pemasukan Perbulan Orang Tua</span>
                     <select name="pemasukan_perbulan_orang_tua" id="pemasukan_perbulan_orang_tua" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
                         <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Rp 500.000 < Rp. 1.500.000">Rp 500.000 < Rp. 1.500.000</option>
-                        <option value="Rp. 1.500.000 < Rp. 2.500.000"> Rp. 1.500.000 < Rp. 2.500.000</option>
-                        <option value="> Rp. 2.500.000"> > Rp. 2.500.000</option>
+                        <option value="1">Rp 500.000 < Rp. 1.500.000</option>
+                        <option value="2"> Rp. 1.500.000 < Rp. 2.500.000</option>
+                        <option value="3"> > Rp. 2.500.000</option>
                     </select>
                 </label>
                 <label class="flex flex-col gap-[10px] font-semibold"> 
@@ -780,9 +776,15 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData,
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json' // Tambahkan header ini
             }
         })
-        .then(response => response.json()) // Ambil JSON dari respons
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 Swal.fire({
@@ -792,7 +794,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#4920E5'
                 }).then(() => {
-                    window.location.href = '/'; // Arahkan ke halaman awal setelah menutup alert
+                    window.location.href = '/';
                 });
             } else {
                 Swal.fire({
@@ -805,11 +807,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error detail:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: 'Terjadi kesalahan saat mengirim data',
+                text: 'Terjadi kesalahan saat mengirim data. Silakan coba lagi.',
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#4920E5'
             });
