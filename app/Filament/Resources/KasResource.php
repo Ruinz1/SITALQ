@@ -141,10 +141,7 @@ class KasResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->whereHas('user.roles', function ($query) {
-                $query->where('name', 'guru');
-            });
+        return parent::getEloquentQuery();
     }
 }
 

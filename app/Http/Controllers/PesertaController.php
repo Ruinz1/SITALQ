@@ -50,15 +50,22 @@ class PesertaController extends Controller
         $fileName = null; // Inisialisasi nama file
         if ($request->hasFile('tanda_tangan')) {
             $file = $request->file('tanda_tangan');
-            $fileName = $file->getClientOriginalName(); // Ambil nama asli file
-            $file->storeAs($fileName, 'public'); // Simpan file dengan nama asli
+            $fileName = time() . '_' . $file->getClientOriginalName(); // Tambah timestamp untuk unik
+            $file->storeAs('tanda_tangan', $fileName, 'public'); // Simpan file di folder tanda_tangan
+            $fileName = 'tanda_tangan/' . $fileName; // Simpan path relatif untuk database
         }
 
         try {
+            // Start database transaction
+            DB::beginTransaction();
+            
             // Log request data
             Log::info('Form submission data:', $request->all());
 
 
+            // Debug: Log the kode pendaftaran being searched
+            Log::info('Searching for kode pendaftaran: ' . $request->kode_pendaftaran_id);
+            
             $tahunajaran = KodePendaftaran::with(['pendaftaran.tahunAjaran'])
             ->where('kode', $request->kode_pendaftaran_id)
             ->whereHas('pendaftaran', function ($query) {
@@ -68,9 +75,16 @@ class PesertaController extends Controller
             })
             ->first();
 
+            // Debug: Log the result
+            Log::info('TahunAjaran query result:', [
+                'found' => $tahunajaran ? 'yes' : 'no',
+                'pendaftaran' => $tahunajaran && $tahunajaran->pendaftaran ? 'yes' : 'no',
+                'tahunAjaran' => $tahunajaran && $tahunajaran->pendaftaran && $tahunajaran->pendaftaran->tahunAjaran ? 'yes' : 'no'
+            ]);
+
             $tahunAjaranNama = $tahunajaran && $tahunajaran->pendaftaran && $tahunajaran->pendaftaran->tahunAjaran
             ? $tahunajaran->pendaftaran->tahunAjaran->nama
-            : null;
+            : '2024/2025'; // Fallback value
 
         // Sekarang Anda bisa menggunakan $tahunAjaranNama sesuai kebutuhan
             // // Validasi data
@@ -169,7 +183,7 @@ class PesertaController extends Controller
                 'sifat_baik' => $request->sifat_baik,
                 'sifat_buruk' => $request->sifat_buruk,
                 'pembantu_rumah_tangga' => $request->pembantu_rumah_tangga,
-                'peralatan_elektronik' =>  json_encode(array_values(array_unique($request->peralatan_elektronik))),
+                'peralatan_elektronik' =>  $request->has('peralatan_elektronik') ? json_encode(array_values(array_unique($request->peralatan_elektronik))) : null,
             ]);
 
             // 6. Buat data Keterangan Peserta
@@ -188,7 +202,6 @@ class PesertaController extends Controller
                 'judulbuku_berlatihmembaca_hijaiyah' => $request->judulbuku_berlatihmembaca_hijaiyah,
                 'jilid_hijaiyah' => $request->jilid_hijaiyah,
                 'keterangan_angka' => $request->keterangan_angka,
-                'keterangan_hafal_surat' => $request->keterangan_hafal_surat,
                 'hobi' => $request->hobi,
                 'keterangan_kisah_islami' => $request->keterangan_kisah_islami,
                 'keterangan_majalah' => $request->keterangan_majalah,
@@ -250,12 +263,15 @@ class PesertaController extends Controller
             
             ]);
 
-            $saudara = Saudara::create([
-                'peserta_id' => $peserta->id,
-                'nama' => $request->nama_saudara,
-                'hubungan' => $request->hubungan_saudara,
-                'umur' => $request->umur_saudara,
-            ]);
+            // Create sibling data only if sibling fields exist
+            if ($request->has('nama_saudara') && $request->nama_saudara) {
+                $saudara = Saudara::create([
+                    'peserta_id' => $peserta->id,
+                    'nama' => $request->nama_saudara,
+                    'hubungan' => $request->hubungan_saudara,
+                    'umur' => $request->umur_saudara,
+                ]);
+            }
 
             // Setelah membuat peserta, tambahkan pembuatan transaksi
             if ($peserta->status_peserta === 'pending') {
@@ -301,10 +317,12 @@ class PesertaController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             
+            Log::error('Error in store method: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
 
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()
             ], 500);
         }
     }

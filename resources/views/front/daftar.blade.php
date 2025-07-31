@@ -1,1205 +1,1738 @@
-@extends('layouts.master')
-@section('title', 'Pendaftaran - TKIT Al Qolam')
-@section('content')
-<section id="Content" class="bg-portto-black flex min-h-screen flex-wrap justify-center">
-    <div class="w-full lg:w-1/2 flex flex-col gap-[50px] items-center justify-center mx-auto py-4 bg-[url('assets/images/Ellipse.svg')] bg-center bg-no-repeat bg-[length:540px]">
-        <div class="form-header w-full">
-            <div class="logo-container">
-                <img src="{{ asset('assets/images/thumbnails/header-3.png') }}" alt="Logo Siswa">
-            </div>
-            <h1 class="text-white text-2xl font-bold mt-4">! PASTIKAN SUDAH MEMILIKI KODE PENDAFTARAN !</h1>
-            <p class="text-white mt-2">Kode pendaftaran didapatkan dari sekolah. Jika tidak memiliki kode pendaftaran atau kode pendaftaran bermasalah, silahkan hubungi nomor berikut: <a href="https://wa.me/6282193734482" class="text-portto-purple">081234567890</a></p>
-        </div>
-        
-        <!-- Progress indicator -->
-        <div class="flex justify-between w-full lg:w-[550px] mb-8 px-4 lg:px-0">
-            <div class="step active cursor-pointer flex flex-col items-center w-[20%]" data-step="1">
-                <div class="step-circle bg-portto-purple text-white rounded-full w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-xs lg:text-base">1</div>
-                <span class="text-white text-xs lg:text-sm mt-2 text-center">Data Peserta</span>
-            </div>
-            <div class="step cursor-pointer flex flex-col items-center w-[20%]" data-step="2">
-                <div class="step-circle bg-white text-portto-purple rounded-full w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-xs lg:text-base">2</div>
-                <span class="text-white text-xs lg:text-sm mt-2 text-center">Data Pendahuluan</span>
-            </div>
-            <div class="step cursor-pointer flex flex-col items-center w-[20%]" data-step="3">
-                <div class="step-circle bg-white text-portto-purple rounded-full w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-xs lg:text-base">3</div>
-                <span class="text-white text-xs lg:text-sm mt-2 text-center">Data Keluarga Peserta</span>
-            </div>
-            <div class="step cursor-pointer flex flex-col items-center w-[20%]" data-step="4">
-                <div class="step-circle bg-white text-portto-purple rounded-full w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-xs lg:text-base">4</div>
-                <span class="text-white text-xs lg:text-sm mt-2 text-center">Data Informasi Peserta</span>
-            </div>
-            <div class="step cursor-pointer flex flex-col items-center w-[20%]" data-step="5">
-                <div class="step-circle bg-white text-portto-purple rounded-full w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-xs lg:text-base">5</div>
-                <span class="text-white text-xs lg:text-sm mt-2 text-center">Data Keterangan Peserta</span>
-            </div>
-            <div class="step cursor-pointer flex flex-col items-center w-[20%]" data-step="6">
-                <div class="step-circle bg-white text-portto-purple rounded-full w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-xs lg:text-base">6</div>
-                <span class="text-white text-xs lg:text-sm mt-2 text-center">Data Pendanaan & Survey Peserta</span>
-            </div>
-        </div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Formulir Pendaftaran Siswa Baru</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+        }
 
-        <form id="multiStepForm" action="{{ route('peserta.store') }}" method="POST" class="flex flex-col gap-5 w-[550px]">
-            @csrf
-            <!-- Step 1: Data Peserta -->
-            <div class="step-content" data-step="1">
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Kode Pendaftaran</span>
-                    <input type="text" name="kode_pendaftaran_id" id="kode_pendaftaran_id" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan kode pendaftaran" required>
-                    <div id="kode_error" class="text-red-500 text-sm hidden">Kode pendaftaran tidak valid</div>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Nama Lengkap</span>
-                    <input type="text" name="nama_peserta" id="nama" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan nama lengkap" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold mt-5">
-                    <span class="text-white">Alamat Email</span>
-                    <input type="email" name="email" id="email" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alamat email" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold mt-5">
-                    <span class="text-white">Alamat</span>
-                    <input type="text" name="alamat" id="alamat" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alamat" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Agama</span>
-                    <input type="text" name="agama" id="agama" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan agama" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Tempat Lahir</span>
-                    <input type="text" name="tempat_lahir" id="tempat_lahir" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tempat lahir" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Tanggal Lahir</span>
-                    <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tanggal lahir" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Jenis Kelamin</span>
-                    <select name="jenis_kelamin" id="jenis_kelamin" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan jenis kelamin" required>
-                        <option value="" class="text-[#878C9C]" selected disabled>Select category</option>
-                        <option value="Laki-laki">Laki-laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Nama Panggilan</span>
-                    <input type="text" name="nama_panggilan" id="nama_panggilan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan nama panggilan" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Bahasa sehari yang digunakan</span>
-                    <input type="text" name="bahasa_sehari" id="bahasa_sehari" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan agama" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Tinggi Badan</span>
-                    <input type="number" name="tinggi_badan" id="tinggi_badan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tinggi badan" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Berat Badan</span>
-                    <input type="number" name="berat_badan" id="berat_badan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan berat badan" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Jumlah Saudara Tiri (Opsional)</span>
-                    <input type="number" value="0" name="jumlah_saudara_tiri" id="jumlah_saudara_tiri" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan jumlah saudara tiri" oninput="updateNamaSaudaraForms()">
-                    <p class="text-white text-sm mt-2">* Jika tidak memiliki saudara maka isi 0</p>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Jumlah Saudara Kandung</span>
-                    <input type="number" name="jumlah_saudara_kandung" id="jumlah_saudara_kandung" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan jumlah saudara kandung" oninput="updateNamaSaudaraForms()">
-                    <p class="text-white text-sm mt-2">* Jika tidak memiliki saudara maka isi 0</p>
-                </label>
-                <div id="namaSaudaraContainer" class="hidden"></div>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Anak ke</span>
-                    <input type="number" name="anak_ke" id="anak_ke" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan anak ke" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold col-span-2">
-                    <span class="text-white">Apakah memiliki Penyakit yang Diderita dengan perawatan ?</span>
-                    <select name="has_penyakit" id="has_penyakit" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="ya">Ya</option>
-                        <option value="tidak">Tidak</option>
-                    </select>
-                </label>
+        .step-active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-color: var(--primary);
+        }
 
-                <!-- Form untuk detail penyakit, disembunyikan secara default -->
-                <div id="penyakitDetails" class="hidden">
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Berapa lama penyakit yang diderita ?</span>
-                        <input type="text" name="penyakit_berapalama" id="penyakit_berapalama" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan lama penyakit">
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Kapan Penyakit diderita ?</span>
-                        <input type="text" name="penyakit_kapan" id="penyakit_kapan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan kapan penyakit diderita">
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Apakah Penyakit mempunyai pantangan ?</span>
-                        <input type="text" name="penyakit_pantangan" id="penyakit_pantangan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan pantangan penyakit">
-                    </label>
+        .step-completed {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .step-inactive {
+            background: white;
+            color: var(--gray-500);
+            border-color: var(--gray-300);
+        }
+
+        .progress-line {
+            height: 2px;
+            background: var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .progress-line.completed {
+            background: var(--success);
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--gray-400);
+            background: var(--gray-50);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .input-error {
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .border-green-500 {
+            border-color: var(--success) !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .confirmation-card {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .confirmation-section {
+            margin-bottom: 20px;
+        }
+
+        .confirmation-section h4 {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 4px;
+            display: inline-block;
+        }
+
+        .confirmation-item {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .confirmation-label {
+            color: var(--gray-600);
+            width: 40%;
+            flex-shrink: 0;
+        }
+
+        .confirmation-value {
+            color: var(--gray-800);
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .step-indicator {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .step-item {
+                flex: 1;
+                min-width: calc(50% - 4px);
+            }
+
+            .progress-line {
+                display: none;
+            }
+
+            .confirmation-item {
+                flex-direction: column;
+                margin-bottom: 12px;
+            }
+
+            .confirmation-label {
+                width: 100%;
+                margin-bottom: 4px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <!-- Header Card -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 text-center">
+                <h1 class="text-3xl font-bold mb-2">Formulir Pendaftaran Siswa Baru</h1>
+                <p class="text-blue-100">Lengkapi semua data dengan benar dan teliti</p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="p-6 pb-0">
+                <div class="flex items-center justify-between step-indicator" id="stepIndicator">
+                    <!-- Step indicators will be generated by JavaScript -->
                 </div>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Mempunyai Alergi (Opsional)</span>
-                    <input type="textarea" name="mempunyai_alergi" id="mempunyai_alergi" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan memiliki alergi">
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Toilet Training (kemampuan ke kamar mandi untuk buang air dll)</span>
-                    <input type="textarea" name="toilet_traning" id="toilet_traning" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan memiliki alergi">
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Tanda Tangan Orang Tua</span>
-                    <input type="file" name="tanda_tangan" id="tanda_tangan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" accept=".png" required>
-                    <p class="text-white text-sm mt-1">* File harus format PNG</p>
-                </label>
-                <div class="flex justify-end mt-12">
-                    <button type="button" class="next-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Next Step</button>
-                </div>
             </div>
 
-            <!-- Add Step: Data Pendahuluan -->
-
-            <div class="step-content hidden" data-step="2">
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Latar Belakang Mendaftarkan Anak ke TKIT AL-Qolam</span>
-                        <input type="textarea" name="latar_belakang" id="latar_belakang" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan Latar Belakang">
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Apa Harapan Bapak/Ibu Mendaftarkan anak ke TKIT AL-Qolam dalam Bidang Keislaman</span>
-                        <input type="textarea" name="harapan_keislaman" id="harapan_keislaman" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan Harapan Keislaman">
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Apa Harapan Bapak/Ibu Mendaftarkan anak ke TKIT AL-Qolam dalam Bidang Keilmuan</span>
-                        <input type="textarea" name="harapan_keilmuan" id="harapan_keilmuan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan Harapan Keilmuan">
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Apa Harapan Bapak/Ibu Mendaftarkan anak ke TKIT AL-Qolam dalam Bidang Sosial</span>
-                        <input type="textarea" name="harapan_sosial" id="harapan_sosial" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan Harapan Sosial">
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold col-span-2">
-                        <span class="text-white">Berapa Lama Bapak/Ibu Berencana Menyekolahkan Anak di TKIT AL-Qolam ?</span>
-                        <select name="berapa_lama_bersekolah" id="berapa_lama_bersekolah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                            <option value="" selected disabled>Pilih opsi</option>
-                            <option value="1">1 Tahun</option>
-                            <option value="2">2 Tahun</option>
-                            <option value="3">3 Tahun</option>
-                        </select>
-                    </label>
-                <div class="flex justify-between mt-12">
-                    <button type="button" class="prev-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Previous</button>
-                    <button type="button" class="next-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Next Step</button>
+            <!-- Form Content -->
+            <div class="p-6">
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold mb-2" id="stepTitle">Data Peserta</h2>
+                    <p class="text-gray-600 text-sm" id="stepDescription">Langkah 1 dari 6</p>
                 </div>
-            </div>
 
-            <!-- Step 2: Data Keluarga -->
-            <div class="step-content hidden" data-step="3">
-                <div class="grid grid-cols-2 gap-5">
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Nama Ayah</span>
-                        <input type="text" name="nama_ayah" id="nama_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan nama ayah" required>
-                    </label>
-                   <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Nama Ibu</span>
-                        <input type="text" name="nama_ibu" id="nama_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan nama ibu" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Alamat Ayah</span>
-                        <input type="text" name="alamat_ayah" id="alamat_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alamat" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Agama Ayah</span>
-                        <input type="text" name="agama_ayah" id="agama_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan agama" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Agama Ibu</span>
-                        <input type="text" name="agama_ibu" id="agama_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan agama" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Alamat Ibu</span>
-                        <input type="text" name="alamat_ibu" id="alamat_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alamat" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Tempat Lahir Ayah</span>
-                        <input type="text" name="tempat_lahir_ayah" id="tempat_lahir_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tempat lahir" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Tempat Lahir Ibu</span>
-                        <input type="text" name="tempat_lahir_ibu" id="tempat_lahir_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tempat lahir" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Tanggal Lahir Ayah</span>
-                        <input type="date" name="tanggal_lahir_ayah" id="tanggal_lahir_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tanggal lahir" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Tanggal Lahir Ibu</span>
-                        <input type="date" name="tanggal_lahir_ibu" id="tanggal_lahir_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tanggal lahir" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Pekerjaan Ayah</span>
-                        <input type="text" name="pekerjaan_ayah" id="pekerjaan_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan pekerjaan" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Pendidikan terakhir Ayah</span>
-                        <input type="text" name="pendidikan_terakhir_ayah" id="pendidikan_terakhir_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan pekerjaan" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Pekerjaan Ibu</span>
-                        <input type="text" name="pekerjaan_ibu" id="pekerjaan_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan pekerjaan" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Pendidikan terakhir Ibu</span>
-                        <input type="text" name="pendidikan_terakhir_ibu" id="pendidikan_terakhir_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan pekerjaan" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Alamat Kantor Ayah</span>
-                        <input type="text" name="alamat_kantor_ayah" id="alamat_kantor_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alamat kantor" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Alamat Kantor Ibu</span>
-                        <input type="text" name="alamat_kantor_ibu" id="alamat_kantor_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alamat kantor" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">No Telepon / Handphone Ayah</span>
-                        <input type="text" name="no_hp_ayah" id="no_hp_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan no telepon / handphone" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">No Telepon / Handphone Ibu</span>
-                        <input type="text" name="no_hp_ibu" id="no_hp_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan no telepon / handphone" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Sosial Media Ayah</span>
-                        <input type="text" name="sosmed_ayah" id="sosmed_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan no telepon / handphone" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold">
-                        <span class="text-white">Sosial Media Ibu</span>
-                        <input type="text" name="sosmed_ibu" id="sosmed_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan no telepon / handphone" required>
-                    </label>
-                    <label class="flex flex-col gap-[10px] font-semibold col-span-2">
-                        <span class="text-white">Apakah memiliki wali?</span>
-                        <select name="has_wali" id="has_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                            <option value="" selected disabled>Pilih opsi</option>
-                            <option value="ya">Ya</option>
-                            <option value="tidak">Tidak</option>
-                        </select>
-                    </label>
+                <form id="registrationForm" action="{{ route('peserta.store') }}" method="POST" >
+                    @csrf
+                    <!-- Step 1: Data Siswa -->
+                    <div class="form-step active" data-step="1">
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="nama_peserta" class="block text-sm font-medium text-gray-700">Nama Lengkap *</label>
+                                    <input type="text" id="nama_peserta" name="nama_peserta" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan nama lengkap">
+                                    <div class="error-message" id="nama_peserta-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="kode_pendaftaran_id" class="block text-sm font-medium text-gray-700">Kode Pendaftaran *</label>
+                                    <input type="text" id="kode_pendaftaran_id" name="kode_pendaftaran_id" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Kode Pendaftaran"
+                                           oninput="checkKodePendaftaran(this.value)"
+                                           onblur="checkKodePendaftaran(this.value)">
+                                    <div class="error-message" id="kode_pendaftaran_id-error"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email *</label>
+                                    <input type="email" id="email" name="email" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan email">
+                                    <div class="error-message" id="email-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat *</label>
+                                    <input type="text" id="alamat" name="alamat" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                                           placeholder="Masukkan Alamat">
+                                    <div class="error-message" id="alamat-error"></div>
+                                </div>
+                                
+                            </div>
+                            <!-- Jenis Kelamin -->
+                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="jenis_kelamin" class="block text-sm font-medium text-gray-700">Jenis Kelamin *</label>
+                                <select id="jenis_kelamin" name="jenis_kelamin" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih jenis kelamin</option>
+                                    <option value="Laki-laki">Laki-laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
+                                <div class="error-message" id="jenis_kelamin-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                    <label for="agama" class="block text-sm font-medium text-gray-700">Agama *</label>
+                                    <input type="text" id="agama" name="agama" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Agama">
+                                    <div class="error-message" id="agama-error"></div>
+                                </div>
+                            </div>
+                            <!-- #endregion Tanggal & Tempat Lahir --> 
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="tempat_lahir" class="block text-sm font-medium text-gray-700">Tempat Lahir *</label>
+                                    <input type="text" id="tempat_lahir" name="tempat_lahir" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan tempat lahir">
+                                    <div class="error-message" id="tempat_lahir-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="tanggal_lahir" class="block text-sm font-medium text-gray-700">Tanggal Lahir *</label>
+                                    <input type="date" id="tanggal_lahir" name="tanggal_lahir" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <div class="error-message" id="tanggal_lahir-error"></div>
+                                </div>
+                            </div>
+                             <!-- Nama Panggilan & Bahasa Sehari --> 
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="nama_panggilan" class="block text-sm font-medium text-gray-700">Nama Panggilan *</label>
+                                    <input type="text" id="nama_panggilan" name="nama_panggilan" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Nama Panggilan">
+                                    <div class="error-message" id="nama_panggilan-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="bahasa_sehari" class="block text-sm font-medium text-gray-700">Bahasa yang digunakan sehari *</label>
+                                    <input type="text" id="bahasa_sehari" name="bahasa_sehari" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Nama Panggilan">
+                                    <div class="error-message" id="bahasa_sehari-error"></div>
+                                </div>
+                            </div>
+                            <!-- Tinggi & Berat Badan --> 
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="tinggi_badan" class="block text-sm font-medium text-gray-700">Tinggi Badan *</label>
+                                    <input type="number" id="tinggi_badan" name="tinggi_badan" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Tinggi Badan">
+                                    <div class="error-message" id="tinggi_badan-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="berat_badan" class="block text-sm font-medium text-gray-700">Berat Badan *</label>
+                                    <input type="number" id="berat_badan" name="berat_badan" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Berat Badan">
+                                    <div class="error-message" id="berat_badan-error"></div>
+                                </div>
+                            </div>
+                            <!-- Jumlah Saudara Tiri & Kandung --> 
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="jumlah_saudara_tiri" class="block text-sm font-medium text-gray-700">Jumlah Saudara Tiri (Opsional)</label>
+                                    <input type="number" id="jumlah_saudara_tiri" name="jumlah_saudara_tiri" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Jumlah Saudara Tiri" min="0" onchange="updateSiblingForm()" oninput="updateSiblingForm()">
+                                    <div class="error-message" id="jumlah_saudara_tiri-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="jumlah_saudara_kandung" class="block text-sm font-medium text-gray-700">Jumlah Saudara Kandung *</label>
+                                    <input type="number" id="jumlah_saudara_kandung" name="jumlah_saudara_kandung" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Jumlah Saudara Kandung" min="0" onchange="updateSiblingForm()" oninput="updateSiblingForm()">
+                                    <div class="error-message" id="jumlah_saudara_kandung-error"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dynamic Sibling Form Section -->
+                            <div id="sibling-form-section" class="hidden" style="transition: opacity 0.3s ease-in-out;">
+                                <div class="border-t border-gray-200 pt-6 mt-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Saudara Kandung & Tiri</h3>
+                                    <div id="sibling-form-container" class="space-y-4">
+                                        <!-- Dynamic sibling forms will be generated here -->
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Anak ke & Toilet Training  --> 
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="anak_ke" class="block text-sm font-medium text-gray-700">Anak ke *</label>
+                                    <input type="number" id="anak_ke" name="anak_ke" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Anak ke berapa">
+                                    <div class="error-message" id="anak_ke-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                <label for="toilet_traning" class="block text-sm font-medium text-gray-700">Toilet Training *</label>
+                                <textarea id="toilet_traning" name="toilet_traning" rows="3"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Apakah Anak Sudah Mampu Untuk Pergi Toilet Sendiri"></textarea>
+                                <div class="error-message" id="toilet_traning-error"></div>
+                            </div>
+                            </div>
+                            <!-- Penyakit -->
+                            <div class="space-y-2">
+                                <label for="has_penyakit" class="block text-sm font-medium text-gray-700">Apakah memiliki Penyakit yang Diderita dengan perawatan *</label>
+                                <select id="has_penyakit" name="has_penyakit" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        onchange="updatePenyakitForm()">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="ya">Ya</option>
+                                    <option value="tidak">Tidak</option>
+                                </select>
+                                <div class="error-message" id="has_penyakit-error"></div>
+                            </div>
+                            
+                            <!-- Dynamic Disease Form Section -->
+                            <div id="penyakit-form-section" class="hidden" style="transition: opacity 0.3s ease-in-out;">
+                                <div class="border-t border-gray-200 pt-6 mt-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Detail Penyakit</h3>
+                                    <div class="space-y-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div class="space-y-2">
+                                                <label for="penyakit_berapalama" class="block text-sm font-medium text-gray-700">Berapa Lama Menderita Penyakit *</label>
+                                                <input type="text" id="penyakit_berapalama" name="penyakit_berapalama" 
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                       placeholder="Contoh: 2 tahun, 6 bulan">
+                                                <div class="error-message" id="penyakit_berapalama-error"></div>
+                                            </div>
+                                            <div class="space-y-2">
+                                                <label for="penyakit_kapan" class="block text-sm font-medium text-gray-700">Kapan Mulai Menderita *</label>
+                                                <input type="text" id="penyakit_kapan" name="penyakit_kapan" 
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                       placeholder="Contoh: Januari 2023">
+                                                <div class="error-message" id="penyakit_kapan-error"></div>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label for="penyakit_pantangan" class="block text-sm font-medium text-gray-700">Pantangan Makanan/Minuman *</label>
+                                            <textarea id="penyakit_pantangan" name="penyakit_pantangan" rows="3"
+                                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                      placeholder="Jelaskan pantangan makanan atau minuman yang harus dihindari"></textarea>
+                                            <div class="error-message" id="penyakit_pantangan-error"></div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label for="mempunyai_alergi" class="block text-sm font-medium text-gray-700">Apakah Mempunyai Alergi *</label>
+                                            <select id="mempunyai_alergi" name="mempunyai_alergi" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                <option value="">Pilih Opsi</option>
+                                                <option value="ya">Ya</option>
+                                                <option value="tidak">Tidak</option>
+                                            </select>
+                                            <div class="error-message" id="mempunyai_alergi-error"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                               <label class="block text-sm font-medium text-gray-700">Upload Tanda Tangan Digital Orang Tua *</label>
+                                    <div class="file-upload-area" onclick="document.getElementById('tanda_tangan').click()">
+                                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                        <p class="text-sm text-gray-600" id="tanda_tangan-label">Pilih file untuk Tanda Tangan</p>
+                                        <p class="text-xs text-gray-500 mt-1">Format: Wajib PNG (max 2MB)</p>
+                                    </div>
+                                    <input type="file" id="tanda_tangan" name="tanda_tangan" accept="image/*" class="hidden" onchange="handleFileSelect(this, 'tanda_tangan-label')">
+                                    <div class="error-message" id="tanda_tangan-error"></div>
+                                
+                            </div>
 
-                    <!-- Form Wali -->
-                    <div id="waliForm" class="hidden contents">
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Nama Wali</span>
-                            <input type="text" name="nama_wali" id="nama_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan nama wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Alamat Wali</span>
-                            <input type="text" name="alamat_wali" id="alamat_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alamat wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Agama Wali</span>
-                            <input type="text" name="agama_wali" id="agama_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan agama wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Tempat Lahir Wali</span>
-                            <input type="text" name="tempat_lahir_wali" id="tempat_lahir_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tempat lahir wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Tanggal Lahir Wali</span>
-                            <input type="date" name="tanggal_lahir_wali" id="tanggal_lahir_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan tanggal lahir wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Pekerjaan Wali</span>
-                            <input type="text" name="pekerjaan_wali" id="pekerjaan_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan pekerjaan wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Pendidikan Terakhir Wali</span>
-                            <input type="text" name="pendidikan_terakhir_wali" id="pendidikan_terakhir_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan pekerjaan wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Alamat Kantor Wali</span>
-                            <input type="text" name="alamat_kantor_wali" id="alamat_kantor_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alamat kantor wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">No Telepon / Handphone Wali</span>
-                            <input type="text" name="no_hp_wali" id="no_hp_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan no telepon / handphone wali">
-                        </label>
-                        <label class="flex flex-col gap-[10px] font-semibold">
-                            <span class="text-white">Sosial Media Wali</span>
-                            <input type="text" name="sosmed_wali" id="sosmed_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan no telepon / handphone" required>
-                        </label>
+                        </div>
                     </div>
-                </div>
-                <div class="flex justify-between mt-12">
-                    <button type="button" class="prev-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Previous</button>
-                    <button type="button" class="next-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Next Step</button>
-                </div>
-            </div>
 
-            <!-- Step 3: Data Informasi Peserta -->
-            <div class="step-content hidden" data-step="4">
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Tinggal bersama</span>
-                    <select name="tinggal_bersama" id="tinggal_bersama" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Keluarga Sendiri">Keluarga Sendiri</option>
-                        <option value="Keluarga Orang Lain">Keluarga Orang Lain</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Jumlah Penghuni Dewasa di Rumah</span>
-                    <input type="number" name="jumlah_penghuni_dewasa" id="jumlah_penghuni_dewasa" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan jumlah penghuni dewasa" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Jumlah Penghuni Anak di Rumah</span>
-                    <input type="number" name="jumlah_penghuni_anak" id="jumlah_penghuni_anak" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan jumlah penghuni anak" required>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Halaman Bermain Dirumah</span>
-                    <select name="halaman_bermain" id="halaman_bermain_dirumah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Ada">Ada</option>
-                        <option value="Tidak Ada">Tidak Ada</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Pergaulan dengan anak seumuran</span>
-                    <select name="pergaulan_dengan_sebaya" id="pergaulan_dengan_sebaya" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Aktif">Aktif</option>
-                        <option value="Pasif">Pasif</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Kepatuhan anak</span>
-                    <select name="kepatuhan_anak" id="kepatuhan_anak" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Baik">Baik</option>
-                        <option value="Cukup">Cukup</option>
-                        <option value="Kurang">Kurang</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Hubungan dengan ayah</span>
-                    <select name="hubungan_dengan_ayah" id="hubungan_dengan_ayah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Baik">Baik</option>
-                        <option value="Cukup">Cukup</option>
-                        <option value="Kurang">Kurang</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Hubungan dengan ibu</span>
-                    <select name="hubungan_dengan_ibu" id="hubungan_dengan_ibu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Baik">Baik</option>
-                        <option value="Cukup">Cukup</option>
-                        <option value="Kurang">Kurang</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Kemampuan Buang Air Masih Harus Dibina ?</span>
-                    <select name="kemampuan_buang_air" id="kemampuan_buang_air" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Ya">Ya</option>
-                        <option value="Tidak">Tidak</option>
-                        <option value="Kadang-kadang">Kadang-kadang</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Apakah anak memiliki kebiasaan ngompol?</span>
-                    <select name="kebiasaan_ngompol" id="kebiasaan_ngompol" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Sering">Sering</option>
-                        <option value="Kadang-kadang">Kadang-kadang</option>
-                        <option value="Jarang">Jarang</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Selera Makan</span>
-                    <textarea name="selera_makan" id="selera_makan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan selera makan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Kebiasaan Tidur Malam</span>
-                    <textarea name="kebiasaan_tidur_malam" id="kebiasaan_tidur_malam" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan kebiasaan tidur malam"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Kebiasaan Tidur Siang</span>
-                    <textarea name="kebiasaan_tidur_siang" id="kebiasaan_tidur_siang" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan kebiasaan tidur siang"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Kebiasaan Bangun Pagi</span>
-                    <textarea name="kebiasaan_bangun_pagi" id="kebiasaan_bangun_pagi" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan kebiasaan bangun pagi"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Kebiasaan Bangun Siang</span>
-                    <textarea name="kebiasan_bangun_siang" id="kebiasan_bangun_siang" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan kebiasaan tidur siang"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Hal-hal yang perlu dicatat atau dikemukakan mengenai tingkah anak</span>
-                    <textarea name="hal_mengenai_tingkah_anak" id="hal_mengenai_tingkah_anak" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan kebiasaan tidur siang"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Hal-hal yang perlu dicatat atau dikemukakan pada waktu tidur anak</span>
-                    <textarea name="hal_penting_waktu_tidur" id="hal_penting_waktu_tidur" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan hal-hal yang perlu dicatat atau dikemukakan pada waktu tidur anak"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Apakah anak mudah bergaul ?</span>
-                    <select name="mudah_bergaul" id="mudah_bergaul" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Ya">Ya</option>
-                        <option value="Kadang-kadang">Kadang-kadang</option>
-                        <option value="Tidak">Tidak</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sifat Baik anak</span>
-                    <textarea name="sifat_baik" id="sifat_baik" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan hal-hal yang perlu dicatat atau dikemukakan pada waktu tidur anak"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sifat Buruk anak</span>
-                    <textarea name="sifat_buruk" id="sifat_buruk" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan hal-hal yang perlu dicatat atau dikemukakan pada waktu tidur anak"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Pembantu Rumah Tangga</span>
-                    <textarea name="pembantu_rumah_tangga" id="pembantu_rumah_tangga" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan hal-hal yang perlu dicatat atau dikemukakan pada waktu tidur anak"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Alat Elektronik di Rumah</span>
-                    <select name="peralatan_elektronik[]" id="peralatan_elektronik" class="bg-white rounded-[20px] p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" multiple required>
-                        <option value="Televisi">Televisi</option>
-                        <option value="Smartphone">Smartphone</option>
-                        <option value="Laptop">Laptop</option>
-                        <option value="Kamera Digital">Kamera Digital</option>
-                    </select>
-                    <p class="text-white text-sm mt-1">* Tekan CTRL (Windows) atau Command (Mac) untuk memilih lebih dari satu</p>
-                </label>
-                <div class="flex justify-between mt-12">
-                    <button type="button" class="prev-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Previous</button>
-                    <button type="button" class="next-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Next Step</button>
-                    {{-- <button type="submit" class="font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Submit</button> --}}
-                </div>
-            </div>
+                    <!-- Step 2: Data Pendahuluan -->
+                    <div class="form-step" data-step="2">
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label for="latar_belakang" class="block text-sm font-medium text-gray-700">Latar Belakang Pendaftaran *</label>
+                                <textarea id="latar_belakang" name="latar_belakang" rows="3"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Masukkan Latar Belakang anda ingin memasukan anak anda ke TKIT Al Qolam"></textarea>
+                                <div class="error-message" id="latar_belakang-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="harapan_keislaman" class="block text-sm font-medium text-gray-700">Harapan Bidang Keislaman *</label>
+                                <textarea id="harapan_keislaman" name="harapan_keislaman" rows="3"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Masukkan Harapan anda ingin memasukan anak ke TKIT Al Qolam dalam bidang Keislaman"></textarea>
+                                <div class="error-message" id="harapan_keislaman-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="harapan_keilmuan" class="block text-sm font-medium text-gray-700">Harapan Bidang Keilmuan *</label>
+                                <textarea id="harapan_keilmuan" name="harapan_keilmuan" rows="3"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Masukkan Harapan anda ingin memasukan anak ke TKIT Al Qolam dalam bidang Keilmuan"></textarea>
+                                <div class="error-message" id="harapan_keilmuan-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="harapan_sosial" class="block text-sm font-medium text-gray-700">Harapan Bidang Sosial *</label>
+                                <textarea id="harapan_sosial" name="harapan_sosial" rows="3"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Masukkan Harapan anda ingin memasukan anak ke TKIT Al Qolam dalam bidang Sosial"></textarea>
+                                <div class="error-message" id="harapan_sosial-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="berapa_lama_bersekolah" class="block text-sm font-medium text-gray-700">Berapa Lama Bapak/Ibu Berencana Menyekolahkan Anak di TKIT AL-Qolam ? *</label>
+                                <select id="berapa_lama_bersekolah" name="berapa_lama_bersekolah" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="1">1 Tahun</option>
+                                    <option value="2">2 Tahun</option>
+                                    <option value="3">3 Tahun</option>
+                                </select>
+                                <div class="error-message" id="berapa_lama_bersekolah-error"></div>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Step 4: Data Keterangan Peserta -->
-            <div class="step-content hidden" data-step="5">
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah Mampu Membaca</span>
-                    <select name="keterangan_membaca" id="keterangan_membaca" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Belum bisa">Belum bisa</option>
-                        <option value="Sedikit bisa">Sedikit bisa</option>
-                        <option value="Sudah mampu">Sudah mampu</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Judul Buku yang digunakan untuk berlatih membaca Latin</span>
-                    <textarea name="judulbuku_berlatihmembaca_latin" id="judulbuku_berlatihmembaca_latin" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Judul Buku yang digunakan untuk berlatih membaca Latin"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah Mampu Membaca Hijaiyah</span>
-                    <select name="keterangan_membaca_hijaiyah" id="keterangan_membaca_hijaiyah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Belum bisa">Belum bisa</option>
-                        <option value="Sedikit bisa">Sedikit bisa</option>
-                        <option value="Sudah mampu">Sudah mampu</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Judul Buku yang digunakan untuk berlatih membaca Hijaiyah</span>
-                    <select name="judulbuku_berlatihmembaca_hijaiyah" id="judulbuku_berlatihmembaca_hijaiyah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Iqro">Iqro</option>
-                        <option value="Al Quran">Al Quran</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah jilid berapa dari buku berlatih membaca Hijaiyah</span>
-                    <textarea name="jilid_hijaiyah" id="jilid_hijaiyah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Sudah jilid berapa dari buku berlatih membaca Hijaiyah"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah Mampu Menulis</span>
-                    <select name="keterangan_menulis" id="keterangan_menulis" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Belum bisa">Belum bisa</option>
-                        <option value="Sedikit bisa">Sedikit bisa</option>
-                        <option value="Sudah mampu">Sudah mampu</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah Mengenal Angka</span>
-                    <select name="keterangan_angka" id="keterangan_angka" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Belum bisa">Belum bisa</option>
-                        <option value="Sedikit bisa">Sedikit bisa</option>
-                        <option value="Sudah mampu">Sudah mampu</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah Mampu Menghitung</span>
-                    <select name="keterangan_menghitung" id="keterangan_menghitung" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Belum bisa">Belum bisa</option>
-                        <option value="Sedikit bisa">Sedikit bisa</option>
-                        <option value="Sudah mampu">Sudah mampu</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah Mampu Menggambar</span>
-                    <select name="keterangan_menggambar" id="keterangan_menggambar" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Belum bisa">Belum bisa</option>
-                        <option value="Sedikit bisa">Sedikit bisa</option>
-                        <option value="Sudah mampu">Sudah mampu</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah Mampu Berwudhu</span>
-                    <select name="keterangan_berwudhu" id="keterangan_berwudhu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Belum bisa">Belum bisa</option>
-                        <option value="Sedikit bisa">Sedikit bisa</option>
-                        <option value="Sudah mampu">Sudah mampu</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Sudah Mampu Melakukan Tata Cara Shalat</span>
-                    <select name="keterangan_tata_cara_shalat" id="keterangan_tata_carashalat" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="Belum bisa">Belum bisa</option>
-                        <option value="Sedikit bisa">Sedikit bisa</option>
-                        <option value="Sudah mampu">Sudah mampu</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Keterangan Hafalan Juz Amma</span>
-                    <textarea name="keterangan_hafalan_juz_ama" id="keterangan_hafalan_juz_ama" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan keterangan hafalan juz amma"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Keterangan Hafalan Murottal</span>
-                    <textarea name="keterangan_hafalan_murottal" id="keterangan_hafalan_murottal" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan keterangan hafalan murottal"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Keterangan Hafalan Doa</span>
-                    <textarea name="keterangan_hafalan_doa" id="keterangan_hafalan_doa" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan keterangan hafalan doa"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Keterangan Hafalan Surah</span>
-                    <textarea name="keterangan_hafal_surat" id="keterangan_hafal_surat" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Sudah jilid berapa dari buku berlatih membaca Hijaiyah"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Hobi Anak</span>
-                    <textarea name="hobi" id="hobi" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Sudah jilid berapa dari buku berlatih membaca Hijaiyah"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Cerita Islami yang sering di dengar anak</span>
-                    <textarea name="keterangan_kisah_islami" id="keterangan_kisah_islami" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Sudah jilid berapa dari buku berlatih membaca Hijaiyah"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Anak Berlangganan majalah</span>
-                    <textarea name="keterangan_majalah" id="keterangan_majalah" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Sudah jilid berapa dari buku berlatih membaca Hijaiyah"></textarea>
-                </label>
-                <div class="flex justify-between mt-12">
-                    <button type="button" class="prev-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Previous</button>
-                    <button type="button" class="next-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Next Step</button>
-                </div>
-            </div>
+                    <!-- Step 3: Data Orang Tua/Wali -->
+                    <div class="form-step" data-step="3">
+                        <div class="space-y-6">
+                            <!-- Nama Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="nama_ayah" class="block text-sm font-medium text-gray-700">Nama Ayah *</label>
+                                    <input type="text" id="nama_ayah" name="nama_ayah" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan nama ayah">
+                                    <div class="error-message" id="nama_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="nama_ibu" class="block text-sm font-medium text-gray-700">Nama Ibu *</label>
+                                    <input type="text" id="nama_ibu" name="nama_ibu" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan nama ibu">
+                                    <div class="error-message" id="nama_ibu-error"></div>
+                                </div>
+                            </div>
 
-            <!-- Step 5: Data Pendanaan & Survey Peserta -->
-            <div class="step-content hidden" data-step="6">
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Pemasukan Perbulan Orang Tua</span>
-                    <select name="pemasukan_perbulan_orang_tua" id="pemasukan_perbulan_orang_tua" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" required>
-                        <option value="" selected disabled>Pilih opsi</option>
-                        <option value="1">Rp 500.000 < Rp. 1.500.000</option>
-                        <option value="2"> Rp. 1.500.000 < Rp. 2.500.000</option>
-                        <option value="3"> > Rp. 2.500.000</option>
-                    </select>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold"> 
-                    <span class="text-white">Apabila ditengah perjalanan kegiatan belajar mengajar (KBM) terjadi kenaikan harga bahan pokok yang berimbas pada biaya operasional terutama konsumsi, maka Tindakan apa yang harus dilakukan agar menu makanan yang diberikan pada anak-anak tetap stabil (berikan alasan)</span>
-                    <textarea name="keterangan_kenaikan_pendapatan" id="keterangan_kenaikan_pendapatan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan keterangan kenaikan pendapatan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Untuk mengatasi masalah kenaikan harga bahan pokok, bagaimana apabila orang tua/ wali murid yang mempunya kelebihan rezeki untuk menyisihkan hartanya/ berinfaq secara sukarela?(berikan alasan)</span>
-                    <textarea name="keterangan_infaq" id="keterangan_infaq" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan keterangan infaq"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Setuju atau tidak setuju, peserta didik tidak boleh ditunggu orrang tua/wali/baby sitster kecuali awal masuk maksimal 2 pekan (berikan alasan)</span>
-                    <textarea name="larangan_menunggu" id="larangan_menunggu" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alasan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Setuju atau tidak setuju, peserta didik dilarang memakai perhiasan kecuali anting atau giwang (Berikan alasan)</span>
-                    <textarea name="larangan_perhiasan" id="larangan_perhiasan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alasan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Setuju atau tidak setuju,orang tua wajib berpakaian Islami Ketika berada di lingkungan TKIT AL-Qolam (bagi ibu/penjemput putri di usahakan memakai jilbab). (berikan alasan)</span>
-                    <textarea name="berpakaian_islami" id="berpakaian_islami" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alasan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Setuju atau tidak setuju, untuk menghadiri pertemuan wali murid 2 bulan sekali (berikan alasan)</span>
-                    <textarea name="menghadiri_pertemuan_wali" id="menghadiri_pertemuan_wali" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alasan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Setuju atau tidak setuju, untuk kontrol_perkembangan (berikan alasan)</span>
-                    <textarea name="kontrol_pengembangan" id="kontrol_pengembangan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alasan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Setuju atau tidak setuju, untuk larangan_merokok (berikan alasan)</span>
-                    <textarea name="larangan_merokok" id="larangan_merokok" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alasan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Setuju atau tidak setuju, untuk tidak_bekerjasama (berikan alasan)</span>
-                    <textarea name="tidak_bekerjasama" id="tidak_bekerjasama" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alasan"></textarea>
-                </label>
-                <label class="flex flex-col gap-[10px] font-semibold">
-                    <span class="text-white">Setuju atau tidak setuju, untuk penjadwalan (berikan alasan)</span>
-                    <textarea name="penjadwalan" id="penjadwalan" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan alasan"></textarea>
-                </label>
-                <div class="flex justify-between mt-12">
-                    <button type="button" class="prev-step font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Previous</button>
-                     <button type="submit" class="font-bold text-lg text-white bg-portto-purple rounded-[20px] p-5 transition-all duration-300 hover:shadow-[0_10px_20px_0_#4920E5]">Submit</button>
+                            <!-- Agama Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="agama_ayah" class="block text-sm font-medium text-gray-700">Agama Ayah *</label>
+                                    <input type="text" id="agama_ayah" name="agama_ayah" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Agama ayah">
+                                    <div class="error-message" id="agama_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="agama_ibu" class="block text-sm font-medium text-gray-700">Agama Ibu *</label>
+                                    <input type="text" id="agama_ibu" name="agama_ibu" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Agama ibu">
+                                    <div class="error-message" id="agama_ibu-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Tempat Lahir Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="tempat_lahir_ayah" class="block text-sm font-medium text-gray-700">Tempat Lahir Ayah *</label>
+                                    <input type="text" id="tempat_lahir_ayah" name="tempat_lahir_ayah" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Tempat Lahir ayah">
+                                    <div class="error-message" id="tempat_lahir_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="tempat_lahir_ibu" class="block text-sm font-medium text-gray-700">Tempat Lahir Ibu *</label>
+                                    <input type="text" id="tempat_lahir_ibu" name="tempat_lahir_ibu" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Tempat Lahir ibu">
+                                    <div class="error-message" id="tempat_lahir_ibu-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Tanggal Lahir Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="tanggal_lahir_ayah" class="block text-sm font-medium text-gray-700">Tanggal Lahir Ayah *</label>
+                                    <input type="date" id="tanggal_lahir_ayah" name="tanggal_lahir_ayah" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Tanggal Lahir ayah">
+                                    <div class="error-message" id="tanggal_lahir_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="tanggal_lahir_ibu" class="block text-sm font-medium text-gray-700">Tanggal Lahir Ibu *</label>
+                                    <input type="date" id="tanggal_lahir_ibu" name="tanggal_lahir_ibu" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Tanggal Lahir ibu">
+                                    <div class="error-message" id="tanggal_lahir_ibu-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Alamat Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="alamat_ayah" class="block text-sm font-medium text-gray-700">Alamat Ayah *</label>
+                                    <input type="text" id="alamat_ayah" name="alamat_ayah" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Alamat ayah">
+                                    <div class="error-message" id="alamat_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="alamat_ibu" class="block text-sm font-medium text-gray-700">Alamat Ibu *</label>
+                                    <input type="text" id="alamat_ibu" name="alamat_ibu" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Alamat ibu">
+                                    <div class="error-message" id="alamat_ibu-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Alamat Kantor Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="alamat_kantor_ayah" class="block text-sm font-medium text-gray-700">Alamat Kantor Ayah </label>
+                                    <input type="text" id="alamat_kantor_ayah" name="alamat_kantor_ayah" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Alamat Kantor ayah">
+                                    <div class="error-message" id="alamat_kantor_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="alamat_kantor_ibu" class="block text-sm font-medium text-gray-700">Alamat Kantor Ibu </label>
+                                    <input type="text" id="alamat_kantor_ibu" name="alamat_kantor_ibu" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Alamat Kantor ibu">
+                                    <div class="error-message" id="alamat_kantor_ibu-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Pendidikan Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="pendidikan_terakhir_ayah" class="block text-sm font-medium text-gray-700">Pendidikan Terakhir Ayah *</label>
+                                    <select id="pendidikan_terakhir_ayah" name="pendidikan_terakhir_ayah" 
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="SD">SD</option>
+                                        <option value="SMP">SMP</option>
+                                        <option value="SMA/SMK">SMA/SMK</option>
+                                        <option value="D3">D3</option>
+                                        <option value="S1">S1</option>
+                                        <option value="S2">S2</option>
+                                        <option value="S3">S3</option>
+                                    </select>
+                                    <div class="error-message" id="pendidikan_terakhir_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="pendidikan_terakhir_ibu" class="block text-sm font-medium text-gray-700">Pendidikan Terakhir Ibu *</label>
+                                    <select id="pendidikan_terakhir_ibu" name="pendidikan_terakhir_ibu" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="SD">SD</option>
+                                    <option value="SMP">SMP</option>
+                                    <option value="SMA/SMK">SMA/SMK</option>
+                                    <option value="D3">D3</option>
+                                    <option value="S1">S1</option>
+                                    <option value="S2">S2</option>
+                                    <option value="S3">S3</option>
+                                    </select>
+                                    <div class="error-message" id="pendidikan_terakhir_ibu-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Pekerjaan Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="pekerjaan_ayah" class="block text-sm font-medium text-gray-700">Pekerjaan Ayah *</label>
+                                    <select id="pekerjaan_ayah" name="pekerjaan_ayah" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="PNS">PNS</option>
+                                        <option value="TNI/POLRI">TNI/POLRI</option>
+                                        <option value="Wiraswasta">Wiraswasta</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                    <div class="error-message" id="pekerjaan_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="pekerjaan_ibu" class="block text-sm font-medium text-gray-700">Pekerjaan Ibu *</label>
+                                    <select id="pekerjaan_ibu" name="pekerjaan_ibu" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="PNS">PNS</option>
+                                        <option value="IRT">Ibu Rumah Tangga</option>
+                                        <option value="Wiraswasta">Wiraswasta</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                    <div class="error-message" id="pekerjaan_ibu-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- No HP Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="no_hp_ayah" class="block text-sm font-medium text-gray-700">No HP Ayah </label>
+                                    <input type="text" id="no_hp_ayah" name="no_hp_ayah" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan No HP ayah">
+                                    <div class="error-message" id="no_hp_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="no_hp_ibu" class="block text-sm font-medium text-gray-700">No HP Ibu </label>
+                                    <input type="text" id="no_hp_ibu" name="no_hp_ibu" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan No HP ibu">
+                                    <div class="error-message" id="no_hp_ibu-error"></div>
+                            </div>
+                            </div>
+
+                            <!-- Sosial Media Ayah dan Ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                    <label for="sosmed_ayah" class="block text-sm font-medium text-gray-700">Sosial Media Ayah </label>
+                                    <input type="text" id="sosmed_ayah" name="sosmed_ayah" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Sosial Media ayah">
+                                    <div class="error-message" id="sosmed_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="sosmed_ibu" class="block text-sm font-medium text-gray-700">Sosial Media Ibu </label>
+                                    <input type="text" id="sosmed_ibu" name="sosmed_ibu" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Sosial Media ibu">
+                                    <div class="error-message" id="sosmed_ibu-error"></div>
+                                </div>
+                            </div>
+                           
+                            <div class="space-y-2">
+                                <label for="has_wali" class="block text-sm font-medium text-gray-700">Mempunyai Wali *</label>
+                                <select id="has_wali" name="has_wali" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                onchange="updateWaliForm()">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="ya">Ya</option>
+                                    <option value="tidak">Tidak</option>
+                                </select>
+                                <div class="error-message" id="has_wali-error"></div>
+                            </div>
+                            
+                            <!-- Dynamic Wali Form Section -->
+                            <div id="wali-form-section" class="hidden" style="transition: opacity 0.3s ease-in-out;">
+                                <div class="border-t border-gray-200 pt-6 mt-6">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Data Wali</h3>
+                                    <div class="space-y-4">
+                                        <!-- Nama Wali -->
+                                        <div class="space-y-2">
+                                            <label for="nama_wali" class="block text-sm font-medium text-gray-700">Nama Wali *</label>
+                                            <input type="text" id="nama_wali" name="nama_wali" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   placeholder="Masukkan nama wali">
+                                            <div class="error-message" id="nama_wali-error"></div>
+                                        </div>
+
+                                        <!-- Agama Wali -->
+                                        <div class="space-y-2">
+                                            <label for="agama_wali" class="block text-sm font-medium text-gray-700">Agama Wali *</label>
+                                            <input type="text" id="agama_wali" name="agama_wali" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   placeholder="Masukkan Agama wali">
+                                            <div class="error-message" id="agama_wali-error"></div>
+                                        </div>
+
+                                        <!-- Tempat Lahir Wali -->
+                                        <div class="space-y-2">
+                                            <label for="tempat_lahir_wali" class="block text-sm font-medium text-gray-700">Tempat Lahir Wali *</label>
+                                            <input type="text" id="tempat_lahir_wali" name="tempat_lahir_wali" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   placeholder="Masukkan Tempat Lahir wali">
+                                            <div class="error-message" id="tempat_lahir_wali-error"></div>
+                                        </div>
+
+                                        <!-- Tanggal Lahir Wali -->
+                                        <div class="space-y-2">
+                                            <label for="tanggal_lahir_wali" class="block text-sm font-medium text-gray-700">Tanggal Lahir Wali *</label>
+                                            <input type="date" id="tanggal_lahir_wali" name="tanggal_lahir_wali" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   placeholder="Masukkan Tanggal Lahir wali">
+                                            <div class="error-message" id="tanggal_lahir_wali-error"></div>
+                                        </div>
+
+                                        <!-- Alamat Wali -->
+                                        <div class="space-y-2">
+                                            <label for="alamat_wali" class="block text-sm font-medium text-gray-700">Alamat Wali *</label>
+                                            <input type="text" id="alamat_wali" name="alamat_wali" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   placeholder="Masukkan Alamat wali">
+                                            <div class="error-message" id="alamat_wali-error"></div>
+                                        </div>
+
+                                        <!-- Alamat Kantor Wali -->
+                                        <div class="space-y-2">
+                                            <label for="alamat_kantor_wali" class="block text-sm font-medium text-gray-700">Alamat Kantor Wali *</label>
+                                            <input type="text" id="alamat_kantor_wali" name="alamat_kantor_wali" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   placeholder="Masukkan Alamat Kantor wali">
+                                            <div class="error-message" id="alamat_kantor_wali-error"></div>
+                                        </div>
+
+                                        <!-- Hubungan dengan Wali -->
+                                        <div class="space-y-2">
+                                            <label for="hubungan_wali" class="block text-sm font-medium text-gray-700">Hubungan dengan Wali *</label>
+                                            <select id="hubungan_wali" name="hubungan_wali" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                <option value="">Pilih Hubungan</option>
+                                                <option value="Kakek">Kakek</option>
+                                                <option value="Nenek">Nenek</option>
+                                                <option value="Paman">Paman</option>
+                                                <option value="Bibi">Bibi</option>
+                                                <option value="Kakak">Kakak</option>
+                                                <option value="Adik">Adik</option>
+                                                <option value="Lainnya">Lainnya</option>
+                                            </select>
+                                            <div class="error-message" id="hubungan_wali-error"></div>
+                                        </div>
+                                        
+                                        <!-- Pendidikan Terakhir Wali -->
+                                        <div class="space-y-2">
+                                            <label for="pendidikan_terakhir_wali" class="block text-sm font-medium text-gray-700">Pendidikan Terakhir Wali *</label>
+                                            <select id="pendidikan_terakhir_wali" name="pendidikan_terakhir_wali" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                <option value="">Pilih Opsi</option>
+                                                <option value="SD">SD</option>
+                                                <option value="SMP">SMP</option>
+                                                <option value="SMA/SMK">SMA/SMK</option>
+                                                <option value="D3">D3</option>
+                                                <option value="S1">S1</option>
+                                                <option value="S2">S2</option>
+                                                <option value="S3">S3</option>
+                                            </select>
+                                            <div class="error-message" id="pendidikan_terakhir_wali-error"></div>
+                                        </div>
+                                        
+                                        <!-- Pekerjaan Wali -->
+                                        <div class="space-y-2">
+                                            <label for="pekerjaan_wali" class="block text-sm font-medium text-gray-700">Pekerjaan Wali *</label>
+                                            <select id="pekerjaan_wali" name="pekerjaan_wali" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                <option value="">Pilih Opsi</option>
+                                                <option value="PNS">PNS</option>
+                                                <option value="TNI/POLRI">TNI/POLRI</option>
+                                                <option value="Wiraswasta">Wiraswasta</option>
+                                                <option value="IRT">Ibu Rumah Tangga</option>
+                                                <option value="Lainnya">Lainnya</option>
+                                            </select>
+                                            <div class="error-message" id="pekerjaan_wali-error"></div>
+                                        </div>
+                                        
+                                        <!-- No HP Wali -->
+                                        <div class="space-y-2">
+                                            <label for="no_hp_wali" class="block text-sm font-medium text-gray-700">No HP Wali *</label>
+                                            <input type="text" id="no_hp_wali" name="no_hp_wali" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   placeholder="Masukkan No HP wali">
+                                            <div class="error-message" id="no_hp_wali-error"></div>
+                                        </div>
+                                        
+                                        <!-- Sosial Media Wali -->
+                                        <div class="space-y-2">
+                                            <label for="sosmed_wali" class="block text-sm font-medium text-gray-700">Sosial Media Wali</label>
+                                            <input type="text" id="sosmed_wali" name="sosmed_wali" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   placeholder="Masukkan Sosial Media wali">
+                                            <div class="error-message" id="sosmed_wali-error"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Data Informasi Peserta -->
+                    <div class="form-step" data-step="4">
+                        <div class="space-y-6">
+                            <!-- Tinggal Bersama & Halaman Bermain -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                    <label for="tinggal_bersama" class="block text-sm font-medium text-gray-700">Tinggal Bersama *</label>
+                                    <select id="tinggal_bersama" name="tinggal_bersama" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="Keluarga Sendiri">Keluarga Sendiri</option>
+                                        <option value="Keluarga Orang Lain">Keluarga Orang Lain</option>
+                                    </select>
+                                    <div class="error-message" id="tinggal_bersama-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="halaman_bermain" class="block text-sm font-medium text-gray-700">Halaman Bermain *</label>
+                                    <select id="halaman_bermain" name="halaman_bermain" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Ada">Ada</option>
+                                    <option value="Tidak Ada">Tidak Ada</option>
+                                    </select>
+                                    <div class="error-message" id="halaman_bermain-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Jumlah penghuni rumah -->
+                            <div class="space-y-2">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-2">
+                                        <label for="jumlah_penghuni_dewasa" class="block text-sm font-medium text-gray-700">Jumlah Penghuni Dewasa di Rumah *</label>
+                                        <input type="number" id="jumlah_penghuni_dewasa" name="jumlah_penghuni_dewasa" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Masukkan Jumlah Penghuni Dewasa di Rumah">
+                            </div>
+                            <div class="space-y-2">
+                                        <label for="jumlah_penghuni_anak" class="block text-sm font-medium text-gray-700">Jumlah Penghuni Anak di Rumah *</label>
+                                        <input type="number" id="jumlah_penghuni_anak" name="jumlah_penghuni_anak" 
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Masukkan Jumlah Penghuni Anak di Rumah">
+                            </div>
+                                </div>
+                            </div>
+
+                            <!-- Kepatuhan kepada orang tua -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="kepatuhan_anak" class="block text-sm font-medium text-gray-700">Kepatuhan kepada orang tua *</label>
+                                    <select id="kepatuhan_anak" name="kepatuhan_anak" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="Baik">Baik</option>
+                                        <option value="Cukup">Cukup</option>
+                                        <option value="Kurang">Kurang</option>
+                                    </select>
+                                    <div class="error-message" id="kepatuhan_anak-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="pergaulan_dengan_sebaya" class="block text-sm font-medium text-gray-700">Pergaulan dengan sebaya *</label>
+                                    <select id="pergaulan_dengan_sebaya" name="pergaulan_dengan_sebaya" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Pasif">Pasif</option>
+                                    </select>
+                                    <div class="error-message" id="pergaulan_dengan_sebaya-error"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hubungan dengan ayah dan ibu -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="hubungan_dengan_ayah" class="block text-sm font-medium text-gray-700">Hubungan dengan ayah *</label>
+                                    <select id="hubungan_dengan_ayah" name="hubungan_dengan_ayah" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="Baik">Baik</option>
+                                        <option value="Cukup">Cukup</option>
+                                        <option value="Kurang">Kurang</option>
+                                    </select>
+                                    <div class="error-message" id="hubungan_dengan_ayah-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="hubungan_dengan_ibu" class="block text-sm font-medium text-gray-700">Hubungan dengan ibu *</label>
+                                    <select id="hubungan_dengan_ibu" name="hubungan_dengan_ibu" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Baik">Baik</option>
+                                    <option value="Cukup">Cukup</option>
+                                    <option value="Kurang">Kurang</option>
+                                    </select>
+                                    <div class="error-message" id="hubungan_dengan_ibu-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Kemampuan Buang Air & Kebiasaan Ngompol -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="kemampuan_buang_air" class="block text-sm font-medium text-gray-700">Kemampuan Buang Air Masih Harus Dibina ? *</label>
+                                    <select id="kemampuan_buang_air" name="kemampuan_buang_air" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="Ya">Ya</option>
+                                        <option value="Tidak">Tidak</option>
+                                        <option value="Kadang-kadang">Kadang-kadang</option>
+                                    </select>
+                                    <div class="error-message" id="kemampuan_buang_air-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="kebiasaan_ngompol" class="block text-sm font-medium text-gray-700">Apakah anak memiliki kebiasaan ngompol? *</label>
+                                    <select id="kebiasaan_ngompol" name="kebiasaan_ngompol" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Sering">Sering</option>
+                                    <option value="Kadang-kadang">Kadang-kadang</option>
+                                    <option value="Jarang">Jarang</option>
+                                    </select>
+                                    <div class="error-message" id="kebiasaan_ngompol-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Selera Makan Anak -->
+                            <div class="space-y-2">
+                                <label for="selera_makan" class="block text-sm font-medium text-gray-700">Selera Makanan Anak *</label>
+                                <textarea id="selera_makan" name="selera_makan" rows="3"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Apakah ada makanan anak yang harus diperhatikan"></textarea>
+                                <div class="error-message" id="selera_makan-error"></div>
+                                </div>
+                            
+                            <!-- Kebiasaan Tidur Anak -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="kebiasaan_tidur_malam" class="block text-sm font-medium text-gray-700">Kebiasaan Tidur Malam Anak *</label>
+                                    <textarea rows="3" id="kebiasaan_tidur_malam" name="kebiasaan_tidur_malam" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan kebiasaan anak ketika tidur pada malam hari"></textarea>
+                                    <div class="error-message" id="kebiasaan_tidur_malam-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="kebiasaan_tidur_siang" class="block text-sm font-medium text-gray-700">Kebiasaan Tidur Siang Anak *</label>
+                                    <textarea rows="3" id="kebiasaan_tidur_siang" name="kebiasaan_tidur_siang" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan kebiasaan anak ketika tidur pada siang hari"></textarea>
+                                    <div class="error-message" id="kebiasaan_tidur_siang-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Kebiasaan Bangun Anak -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="kebiasaan_bangun_pagi" class="block text-sm font-medium text-gray-700">Kebiasaan Bangun Pagi Anak *</label>
+                                    <textarea rows="3" id="kebiasaan_bangun_pagi" name="kebiasaan_bangun_pagi" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan kebiasaan anak bangun pada pagi hari"></textarea>
+                                    <div class="error-message" id="kebiasaan_bangun_pagi-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="kebiasan_bangun_siang" class="block text-sm font-medium text-gray-700">Kebiasaan Bangun Siang Anak *</label>
+                                    <textarea rows="3" id="kebiasan_bangun_siang" name="kebiasan_bangun_siang" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan kebiasaan anak ketika bangun pada siang hari"></textarea>
+                                    <div class="error-message" id="kebiasan_bangun_siangn_tidur_siang-error"></div>
+                                </div>
+                            </div>
+                          
+                            <!-- Tingkah Laku Anak -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="hal_mengenai_tingkah_anak" class="block text-sm font-medium text-gray-700">Hal-hal yang perlu dicatat atau dikemukakan mengenai tingkah anak *</label>
+                                    <textarea rows="3" id="hal_mengenai_tingkah_anak" name="hal_mengenai_tingkah_anak" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Tingkah laku anak"></textarea>
+                                    <div class="error-message" id="hal_mengenai_tingkah_anak-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="hal_penting_waktu_tidur" class="block text-sm font-medium text-gray-700">Hal-hal yang perlu dicatat atau dikemukakan pada waktu tidur anak *</label>
+                                    <textarea rows="3" id="hal_penting_waktu_tidur" name="hal_penting_waktu_tidur" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan Hal-hal yang perlu dicatat atau dikemukakan pada waktu tidur anak"></textarea>
+                                    <div class="error-message" id="hal_penting_waktu_tidur-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Mudah Bergaul -->
+                            <div class="space-y-2">
+                                <label for="mudah_bergaul" class="block text-sm font-medium text-gray-700">Apakah anak mudah bergaul ? *</label>
+                                <select id="mudah_bergaul" name="mudah_bergaul" 
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="Ya">Ya</option>
+                                        <option value="Tidak">Tidak</option>
+                                        <option value="Kadang-kadang">Kadang-kadang</option>
+                                    </select>
+                                <div class="error-message" id="mudah_bergaul-error"></div>
+                                </div>
+                            
+                            <!-- Sifat Atau Kebiasaan Baik Anak -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="sifat_baik" class="block text-sm font-medium text-gray-700">Sifat Atau Kebiasaan Baik Anak *</label>
+                                    <textarea rows="3" id="sifat_baik" name="sifat_baik" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan sifat Atau Kebiasaan Baik Anak"></textarea>
+                                    <div class="error-message" id="sifat_baik-error"></div>
+                            </div>
+                                <div class="space-y-2">
+                                    <label for="sifat_buruk" class="block text-sm font-medium text-gray-700">Sifat Atau Kebiasaan Buruk Anak*</label>
+                                    <textarea rows="3" id="sifat_buruk" name="sifat_buruk" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="Masukkan sifat Atau Kebiasaan Baik Anak"></textarea>
+                                    <div class="error-message" id="sifat_buruk-error"></div>
+                                </div>
+                            </div>
+
+                            <!-- Pembantu Rumah Tangga & Peralatan Elektronik -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="pembantu_rumah_tangga" class="block text-sm font-medium text-gray-700">Apakah memiliki pembantu rumah tangga ? *</label>
+                                    <select id="pembantu_rumah_tangga" name="pembantu_rumah_tangga" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="Ya">Ya</option>
+                                        <option value="Tidak">Tidak</option>
+                                    </select>
+                                    <div class="error-message" id="pembantu_rumah_tangga-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Peralatan elektronik yang berada di rumah *
+                                    </label>
+                                    <p class="text-xs text-gray-500 mb-2">
+                                        * Anda dapat memilih lebih dari satu.
+                                    </p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" name="peralatan_elektronik[]" value="tv" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span>TV</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" name="peralatan_elektronik[]" value="kulkas" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span>Kulkas</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" name="peralatan_elektronik[]" value="mesin_cuci" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span>Mesin Cuci</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" name="peralatan_elektronik[]" value="ac" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span>AC</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" name="peralatan_elektronik[]" value="microwave" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span>Microwave</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" name="peralatan_elektronik[]" value="komputer" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span>Komputer</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" name="peralatan_elektronik[]" value="setrika" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span>Setrika</span>
+                                        </label>
+                                    </div>
+                                    <div class="error-message" id="peralatan_elektronik-error"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Data Keterangan Peserta -->
+                    <div class="form-step" data-step="5">
+                        <div class="space-y-6">
+                           <!-- Keterangan Membaca -->
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                    <label for="keterangan_membaca" class="block text-sm font-medium text-gray-700">Apakah anak sudah mampu membaca ? *</label>
+                                    <select id="keterangan_membaca" name="keterangan_membaca" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="Belum bisa">Belum bisa</option>
+                                        <option value="Sedikit bisa">Sedikit bisa</option>
+                                        <option value="Sudah mampu">Sudah mampu</option>
+                                    </select>
+                                    <div class="error-message" id="keterangan_membaca-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="keterangan_membaca_hijaiyah" class="block text-sm font-medium text-gray-700">Apakah anak sudah mampu membaca Hijaiyah ? *</label>
+                                    <select id="keterangan_membaca_hijaiyah" name="keterangan_membaca_hijaiyah" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Belum bisa">Belum bisa</option>
+                                    <option value="Sedikit bisa">Sedikit bisa</option>
+                                    <option value="Sudah mampu">Sudah mampu</option>
+                                    </select>
+                                    <div class="error-message" id="keterangan_membaca_hijaiyah-error"></div>
+                                </div>
+                           </div>
+
+                           <!-- Buku Membaca -->
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                    <label for="judulbuku_berlatihmembaca_latin" class="block text-sm font-medium text-gray-700">Apa judul buku digunakan untuk berlatih membaca ? *</label>
+                                    <textarea rows="3" id="judulbuku_berlatihmembaca_latin" name="judulbuku_berlatihmembaca_latin" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Masukkan judul buku yang digunakan untuk berlatih membaca Latin"></textarea>
+                                    <div class="error-message" id="judulbuku_berlatihmembaca_latin-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="judulbuku_berlatihmembaca_hijaiyah" class="block text-sm font-medium text-gray-700">Apa judul buku digunakan untuk berlatih membaca Hijaiyah ? *</label>
+                                <select id="judulbuku_berlatihmembaca_hijaiyah" name="judulbuku_berlatihmembaca_hijaiyah" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Pilih Opsi</option>
+                                <option value="Iqro">Iqro</option>
+                                <option value="Al Quran">Al Quran</option>
+                                </select>
+                                <div class="error-message" id="judulbuku_berlatihmembaca_hijaiyah-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="jilid_hijaiyah" class="block text-sm font-medium text-gray-700">Sudah jilid berapa dari buku berlatih membaca Hijaiyah ? *</label>
+                                <textarea rows="3" id="jilid_hijaiyah" name="jilid_hijaiyah" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan jilid keberapa dari buku berlatih membaca Hijaiyah"></textarea>
+                                <div class="error-message" id="jilid_hijaiyah-error"></div>
+                            </div>
+                               
+                           </div>
+
+                           <!-- Keterangan Kemampuan anak -->
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                    <label for="keterangan_menulis" class="block text-sm font-medium text-gray-700">Apakah anak sudah mampu menulis ? *</label>
+                                    <select id="keterangan_menulis" name="keterangan_menulis" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Pilih Opsi</option>
+                                        <option value="Belum bisa">Belum bisa</option>
+                                        <option value="Sedikit bisa">Sedikit bisa</option>
+                                        <option value="Sudah mampu">Sudah mampu</option>
+                                    </select>
+                                    <div class="error-message" id="keterangan_menulis-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="keterangan_menggambar" class="block text-sm font-medium text-gray-700">Apakah anak sudah mampu menggambar ? *</label>
+                                    <select id="keterangan_menggambar" name="keterangan_menggambar" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Belum bisa">Belum bisa</option>
+                                    <option value="Sedikit bisa">Sedikit bisa</option>
+                                    <option value="Sudah mampu">Sudah mampu</option>
+                                    </select>
+                                    <div class="error-message" id="keterangan_menggambar-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="keterangan_angka" class="block text-sm font-medium text-gray-700">Apakah anak sudah mampu mengenal angka ? *</label>
+                                    <select id="keterangan_angka" name="keterangan_angka" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Belum bisa">Belum bisa</option>
+                                    <option value="Sedikit bisa">Sedikit bisa</option>
+                                    <option value="Sudah mampu">Sudah mampu</option>
+                                    </select>
+                                    <div class="error-message" id="keterangan_angka-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="keterangan_menghitung" class="block text-sm font-medium text-gray-700">Apakah anak sudah mampu menghitung ? *</label>
+                                    <select id="keterangan_menghitung" name="keterangan_menghitung" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Belum bisa">Belum bisa</option>
+                                    <option value="Sedikit bisa">Sedikit bisa</option>
+                                    <option value="Sudah mampu">Sudah mampu</option>
+                                    </select>
+                                    <div class="error-message" id="keterangan_menghitung-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="keterangan_berwudhu" class="block text-sm font-medium text-gray-700">Apakah anak sudah mampu berwudhu ? *</label>
+                                    <select id="keterangan_berwudhu" name="keterangan_berwudhu" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Belum bisa">Belum bisa</option>
+                                    <option value="Sedikit bisa">Sedikit bisa</option>
+                                    <option value="Sudah mampu">Sudah mampu</option>
+                                    </select>
+                                    <div class="error-message" id="keterangan_berwudhu-error"></div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label for="keterangan_tata_cara_shalat" class="block text-sm font-medium text-gray-700">Apakah anak sudah mampu mengenal tata cara shalat ? *</label>
+                                    <select id="keterangan_tata_cara_shalat" name="keterangan_tata_cara_shalat" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Opsi</option>
+                                    <option value="Belum bisa">Belum bisa</option>
+                                    <option value="Sedikit bisa">Sedikit bisa</option>
+                                    <option value="Sudah mampu">Sudah mampu</option>
+                                    </select>
+                                    <div class="error-message" id="keterangan_tata_cara_shalat-error"></div>
+                                </div>
+                           </div>
+
+                           <!-- Keterangan Menghafal -->
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                    <label for="keterangan_hafalan_doa" class="block text-sm font-medium text-gray-700">Apa anak sudah memiliki atau sering mendengar hafalan doa ? *</label>
+                                    <textarea rows="3" id="keterangan_hafalan_doa" name="keterangan_hafalan_doa" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Masukkan doa yang sudah di hafal"></textarea>
+                                    <div class="error-message" id="keterangan_hafalan_doa-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="keterangan_hafalan_juz_ama" class="block text-sm font-medium text-gray-700">Apa anak sudah memiliki hafalan atau sering mendengar juz amma  ? *</label>
+                                <textarea rows="3" id="keterangan_hafalan_juz_ama" name="keterangan_hafalan_juz_ama" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan jilid keberapa dari buku berlatih membaca Hijaiyah"></textarea>
+                                <div class="error-message" id="keterangan_hafalan_juz_ama-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="keterangan_hafalan_murottal" class="block text-sm font-medium text-gray-700">Apa anak sudah memiliki hafalan atau sering mendengar murotal ? *</label>
+                                <textarea rows="3" id="keterangan_hafalan_murottal" name="keterangan_hafalan_murottal" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan jilid keberapa dari buku berlatih membaca Hijaiyah"></textarea>
+                                <div class="error-message" id="keterangan_hafalan_murottal-error"></div>
+                            </div>
+                           </div>
+
+                           <!-- Hobi Anak -->
+                           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                    <label for="hobi" class="block text-sm font-medium text-gray-700">Apa hobi anak ? *</label>
+                                    <textarea rows="3" id="hobi" name="hobi" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Masukkan hobi anak"></textarea>
+                                    <div class="error-message" id="hobi-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="keterangan_kisah_islami" class="block text-sm font-medium text-gray-700">Apakah anak sering mendengar cerita islami atau kisah para nabi ? *</label>
+                                <textarea rows="3" id="keterangan_kisah_islami" name="keterangan_kisah_islami" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan kisah yang sering anak dengarkan"></textarea>
+                                <div class="error-message" id="keterangan_kisah_islami-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="keterangan_majalah" class="block text-sm font-medium text-gray-700">Apakah berlangganan majalah ? *</label>
+                                <textarea rows="3" id="keterangan_majalah" name="keterangan_majalah" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan kisah majalah yang sering anak baca"></textarea>
+                                <div class="error-message" id="keterangan_majalah-error"></div>
+                            </div>
+                           </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Step 6: Konfirmasi & Submit -->
+                    <div class="form-step" data-step="6">
+                        <div class="space-y-6">
+
+                            <!-- Pemasukan Perbulan Orang Tua -->
+                            <div class="space-y-2">
+                                        <label for="pemasukan_perbulan_orang_tua" class="block text-sm font-medium text-gray-700">Masukan Perbulan Orang Tua *</label>
+                                        <select id="pemasukan_perbulan_orang_tua" name="pemasukan_perbulan_orang_tua" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Pilih Opsi</option>
+                                            <option value="1">Rp 500.000 < Rp. 1.500.000</option>
+                                            <option value="2"> Rp. 1.500.000 < Rp. 2.500.000</option>
+                                            <option value="3"> > Rp. 2.500.000</option>
+                                        </select>
+                                        <div class="error-message" id="pemasukan_perbulan_orang_tua-error"></div>
+                            </div>
+
+                            <!-- Keterangan Dana-->
+                            <div class="space-y-2">
+                                <label for="keterangan_kenaikan_pendapatan" class="block text-sm font-medium text-gray-700">Apabila ditengah perjalanan kegiatan belajar mengajar (KBM) terjadi kenaikan harga bahan pokok yang berimbas pada biaya operasional terutama konsumsi, maka Tindakan apa yang harus dilakukan agar menu makanan yang diberikan pada anak-anak tetap stabil (berikan alasan) *</label>
+                                <textarea rows="3" id="keterangan_kenaikan_pendapatan" name="keterangan_kenaikan_pendapatan" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="keterangan_kenaikan_pendapatan-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="keterangan_infaq" class="block text-sm font-medium text-gray-700">Untuk mengatasi masalah kenaikan harga bahan pokok, bagaimana apabila orang tua/ wali murid yang mempunya kelebihan rezeki untuk menyisihkan hartanya/ berinfaq secara sukarela?(berikan alasan) *</label>
+                                <textarea rows="3" id="keterangan_infaq" name="keterangan_infaq" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="keterangan_infaq-error"></div>
+                            </div>
+
+                            <!-- Keterangan Survei-->
+                            <div class="space-y-2">
+                                <label for="larangan_menunggu" class="block text-sm font-medium text-gray-700">Setuju atau tidak setuju, peserta didik tidak boleh ditunggu orrang tua/wali/baby sitster kecuali awal masuk maksimal 2 pekan (berikan alasan) *</label>
+                                <textarea rows="3" id="larangan_menunggu" name="larangan_menunggu" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="larangan_menunggu-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="larangan_perhiasan" class="block text-sm font-medium text-gray-700">Setuju atau tidak setuju, peserta didik dilarang memakai perhiasan kecuali anting atau giwang (Berikan alasan) *</label>
+                                <textarea rows="3" id="larangan_perhiasan" name="larangan_perhiasan" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="larangan_perhiasan-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="berpakaian_islami" class="block text-sm font-medium text-gray-700">Setuju atau tidak setuju,orang tua wajib berpakaian Islami Ketika berada di lingkungan TKIT AL-Qolam (bagi ibu/penjemput putri di usahakan memakai jilbab). (berikan alasan) *</label>
+                                <textarea rows="3" id="berpakaian_islami" name="berpakaian_islami" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="berpakaian_islami-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="menghadiri_pertemuan_wali" class="block text-sm font-medium text-gray-700">Setuju atau tidak setuju, untuk menghadiri pertemuan wali murid 2 bulan sekali (berikan alasan) *</label>
+                                <textarea rows="3" id="menghadiri_pertemuan_wali" name="menghadiri_pertemuan_wali" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="menghadiri_pertemuan_wali-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="kontrol_pengembangan" class="block text-sm font-medium text-gray-700">Setuju atau tidak setuju, wali murid mengikuti kontrol perkembangan secara rutin selama di TKIT AL-Qolam. (berikan alasan) *</label>
+                                <textarea rows="3" id="kontrol_pengembangan" name="kontrol_pengembangan" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="kontrol_pengembangan-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="larangan_merokok" class="block text-sm font-medium text-gray-700">Setuju atau tidak setuju, orang tua/wali mematuhi larangan merokok di lingkungan TKIT AL-Qolam. (berikan alasan) *</label>
+                                <textarea rows="3" id="larangan_merokok" name="larangan_merokok" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="larangan_merokok-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="tidak_bekerjasama" class="block text-sm font-medium text-gray-700">Setuju atau tidak setuju, orang tua/wali tidak bekerja sama dengan pihak TKIT AL-Qolam dalam proses pendidikan anak. (berikan alasan) *</label>
+                                <textarea rows="3" id="larangan_merokok" name="tidak_bekerjasama" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="tidak_bekerjasama-error"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="penjadwalan" class="block text-sm font-medium text-gray-700">Setuju atau tidak setuju, orang tua/wali bersedia mengikuti penjadwalan kegiatan yang telah ditetapkan oleh TKIT AL-Qolam. (berikan alasan) *</label>
+                                <textarea rows="3" id="penjadwalan" name="penjadwalan" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Masukkan pendapat anda"></textarea>
+                                <div class="error-message" id="penjadwalan-error"></div>
+                            </div>
+
+                            <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                                <p class="text-sm text-yellow-800">
+                                    <strong>Perhatian:</strong> Pastikan semua data yang Anda masukkan sudah benar. 
+                                    Setelah submit, data tidak dapat diubah kembali.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between mt-8 pt-6 border-t border-gray-200">
+                    <button type="button" id="prevBtn" class="btn-secondary" onclick="changeStep(-1)" disabled>
+                        <i class="fas fa-arrow-left mr-2"></i>Kembali
+                    </button>
+
+                    <button type="button" id="nextBtn" class="btn-primary" onclick="changeStep(1)">
+                        Selanjutnya<i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+
+                    <button type="button" id="submitBtn" class="btn-success hidden" onclick="submitForm()">
+                        <i class="fas fa-check mr-2"></i>Submit Pendaftaran
+                    </button>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
-</section>
 
-<!-- Tambahkan script di bawah ini -->
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('multiStepForm');
-    const steps = document.querySelectorAll('.step-content');
-    const stepIndicators = document.querySelectorAll('.step');
-    let currentStep = 1;
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+            <div>
+                <div class="font-semibold">Pendaftaran Berhasil!</div>
+                <div class="text-sm text-gray-600">Data pendaftaran siswa telah berhasil dikirim.</div>
+            </div>
+        </div>
+    </div>
 
-    function validateStep(stepNumber) {
-        const currentInputs = steps[stepNumber-1].querySelectorAll('input:not([type="hidden"]), select, textarea');
-        let isValid = true;
+    <script src="daftar.js"></script>
+    
+    <script>
+        // Function to check kode pendaftaran
+        let checkKodeTimeout;
         
-        currentInputs.forEach(input => {
-            if (input.closest('#waliForm') && document.getElementById('waliForm').classList.contains('hidden')) {
+        function checkKodePendaftaran(kode) {
+            if (!kode || kode.trim() === '') {
+                clearKodeValidation();
                 return;
             }
             
-            if (input.required && !input.value) {
-                isValid = false;
-                input.reportValidity();
-            }
-        });
-        
-        return isValid;
-    }
-
-    function updateStepStyles(newStep) {
-        stepIndicators.forEach((indicator, index) => {
-            const stepCircle = indicator.querySelector('.step-circle');
+            // Clear previous timeout
+            clearTimeout(checkKodeTimeout);
             
-            // Reset semua step ke default style
-            indicator.classList.remove('active', 'completed');
-            stepCircle.classList.remove('bg-portto-purple', 'text-white');
-            stepCircle.classList.add('bg-white', 'text-portto-purple');
+            // Set new timeout to avoid too many requests
+            checkKodeTimeout = setTimeout(() => {
+                fetch(`/api/check-kode/${encodeURIComponent(kode.trim())}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const input = document.getElementById('kode_pendaftaran_id');
+                        const errorDiv = document.getElementById('kode_pendaftaran_id-error');
+                        
+                        if (data.valid) {
+                            // Kode valid
+                            input.classList.remove('input-error');
+                            input.classList.add('border-green-500');
+                            errorDiv.textContent = '';
+                            errorDiv.style.display = 'none';
+                        } else {
+                            // Kode tidak valid atau sudah digunakan
+                            input.classList.add('input-error');
+                            input.classList.remove('border-green-500');
+                            errorDiv.textContent = data.message;
+                            errorDiv.style.display = 'block';
+                            
+                            // Show SweetAlert if code is already used
+                            if (data.message === 'Kode sudah digunakan') {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Kode Sudah Digunakan!',
+                                    text: 'Kode pendaftaran yang Anda masukkan sudah digunakan oleh peserta lain. Silakan gunakan kode pendaftaran yang berbeda.',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#F59E0B',
+                                    showClass: {
+                                        popup: 'animate__animated animate__fadeInDown'
+                                    },
+                                    hideClass: {
+                                        popup: 'animate__animated animate__fadeOutUp'
+                                    }
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking kode:', error);
+                        const input = document.getElementById('kode_pendaftaran_id');
+                        const errorDiv = document.getElementById('kode_pendaftaran_id-error');
+                        
+                        input.classList.add('input-error');
+                        input.classList.remove('border-green-500');
+                        errorDiv.textContent = 'Terjadi kesalahan saat memeriksa kode';
+                        errorDiv.style.display = 'block';
+                    });
+            }, 500); // Delay 500ms after user stops typing
+        }
+        
+        function clearKodeValidation() {
+            const input = document.getElementById('kode_pendaftaran_id');
+            const errorDiv = document.getElementById('kode_pendaftaran_id-error');
             
-            // Set style untuk step yang aktif
-            if (index + 1 === newStep) {
-                indicator.classList.add('active');
-                stepCircle.classList.remove('bg-white', 'text-portto-purple');
-                stepCircle.classList.add('bg-portto-purple', 'text-white');
-            }
-        });
-    }
-
-    function changeStep(newStep) {
-        if (!validateStep(currentStep)) {
-            return;
+            input.classList.remove('input-error', 'border-green-500');
+            errorDiv.textContent = '';
+            errorDiv.style.display = 'none';
         }
-
-        // Sembunyikan step saat ini
-        steps[currentStep-1].classList.add('hidden');
         
-        // Tampilkan step baru
-        steps[newStep-1].classList.remove('hidden');
-        
-        // Update styles untuk indicators
-        updateStepStyles(newStep);
-        
-        currentStep = newStep;
-    }
-
-    // Event listener untuk indikator step yang dapat diklik
-    stepIndicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => {
-            const targetStep = index + 1;
-            if (targetStep !== currentStep) {
-                changeStep(targetStep);
+        // Function to update sibling form based on input values
+        function updateSiblingForm() {
+            const jumlahSaudaraTiri = parseInt(document.getElementById('jumlah_saudara_tiri').value) || 0;
+            const jumlahSaudaraKandung = parseInt(document.getElementById('jumlah_saudara_kandung').value) || 0;
+            const totalSaudara = jumlahSaudaraTiri + jumlahSaudaraKandung;
+            
+            const siblingFormSection = document.getElementById('sibling-form-section');
+            const siblingFormContainer = document.getElementById('sibling-form-container');
+            
+            // Validate input values
+            if (jumlahSaudaraTiri < 0) {
+                document.getElementById('jumlah_saudara_tiri').value = 0;
             }
-        });
-    });
-
-    // Next button handler
-    form.querySelectorAll('.next-step').forEach(button => {
-        button.addEventListener('click', () => {
-            if (currentStep < steps.length) {
-                changeStep(currentStep + 1);
+            if (jumlahSaudaraKandung < 0) {
+                document.getElementById('jumlah_saudara_kandung').value = 0;
             }
-        });
-    });
-
-    // Previous button handler
-    form.querySelectorAll('.prev-step').forEach(button => {
-        button.addEventListener('click', () => {
-            if (currentStep > 1) {
-                changeStep(currentStep - 1);
+            
+            // Show/hide the form section based on total siblings
+            if (totalSaudara > 0) {
+                siblingFormSection.classList.remove('hidden');
+                generateSiblingForms(totalSaudara, jumlahSaudaraKandung);
+                
+                // Add smooth animation
+                siblingFormSection.style.opacity = '0';
+                setTimeout(() => {
+                    siblingFormSection.style.opacity = '1';
+                }, 10);
+            } else {
+                siblingFormSection.classList.add('hidden');
+                siblingFormContainer.innerHTML = '';
             }
-        });
-    });
-
-    // Form submit handler
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Mencegah pengiriman form default
-
-        if (!validateStep(currentStep)) {
-            return;
         }
-
-        // Tampilkan loading indicator
-        Swal.fire({
-            title: 'Mohon Tunggu',
-            text: 'Sedang memproses pendaftaran...',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            willOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        const formData = new FormData(this);
         
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json' // Tambahkan header ini
+        // Function to generate sibling form fields
+        function generateSiblingForms(totalSaudara, jumlahSaudaraKandung) {
+            const container = document.getElementById('sibling-form-container');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < totalSaudara; i++) {
+                const isKandung = i < jumlahSaudaraKandung;
+                const siblingType = isKandung ? 'Kandung' : 'Tiri';
+                const siblingNumber = i + 1;
+                
+                const siblingForm = document.createElement('div');
+                siblingForm.className = 'bg-gray-50 p-4 rounded-lg border border-gray-200';
+                siblingForm.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-medium text-gray-800">Saudara ${siblingNumber} (${siblingType})</h4>
+                        <span class="text-xs px-2 py-1 rounded-full ${isKandung ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}">
+                            ${siblingType}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="space-y-2">
+                            <label for="nama_saudara${i}" class="block text-sm font-medium text-gray-700">Nama Saudara *</label>
+                            <input type="text" id="nama_saudara${i}" name="nama_saudara${i}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Masukkan nama saudara" required>
+                            <div class="error-message" id="nama_saudara${i}-error"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="hubungan_saudara${i}" class="block text-sm font-medium text-gray-700">Hubungan *</label>
+                            <select id="hubungan_saudara${i}" name="hubungan_saudara${i}" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                <option value="">Pilih hubungan</option>
+                                <option value="Kakak">Kakak</option>
+                                <option value="Adik">Adik</option>
+                            </select>
+                            <div class="error-message" id="hubungan_saudara_${i}-error"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <label for="umur_saudara${i}" class="block text-sm font-medium text-gray-700">Umur *</label>
+                            <input type="number" id="umur_saudara${i}" name="umur_saudara${i}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Masukkan umur" min="0" max="100" required>
+                            <div class="error-message" id="umur_saudara${i}-error"></div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(siblingForm);
             }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: data.message,
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#4920E5'
-                }).then(() => {
-                    window.location.href = '/';
+        }
+        
+        // Function to update disease form based on has_penyakit selection
+        function updatePenyakitForm() {
+            const hasPenyakit = document.getElementById('has_penyakit').value;
+            const penyakitFormSection = document.getElementById('penyakit-form-section');
+            
+            // Show/hide the form section based on has_penyakit value
+            if (hasPenyakit === 'ya') {
+                penyakitFormSection.classList.remove('hidden');
+                
+                // Add smooth animation
+                penyakitFormSection.style.opacity = '0';
+                setTimeout(() => {
+                    penyakitFormSection.style.opacity = '1';
+                }, 10);
+                
+                // Make all fields in the disease section required
+                const requiredFields = ['penyakit_berapalama', 'penyakit_kapan', 'penyakit_pantangan', 'mempunyai_alergi'];
+                requiredFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.required = true;
+                    }
                 });
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: data.message || 'Terjadi kesalahan saat memproses pendaftaran',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#4920E5'
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error detail:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'Terjadi kesalahan saat mengirim data. Silakan coba lagi.',
-                confirmButtonText: 'OK',
-                confirmButtonColor: '#4920E5'
-            });
-        });
-    });
-
-    // Inisialisasi tampilan awal
-    updateStepStyles(currentStep);
-
-    // Tambahkan script untuk menangani form wali
-    const hasWaliSelect = document.getElementById('has_wali');
-    const waliForm = document.getElementById('waliForm');
-    const waliInputs = waliForm.querySelectorAll('input');
-
-    hasWaliSelect.addEventListener('change', function() {
-        if (this.value === 'ya') {
-            waliForm.classList.remove('hidden');
-            // Aktifkan validasi untuk input wali
-            waliInputs.forEach(input => {
-                input.required = true;
-            });
-        } else {
-            waliForm.classList.add('hidden');
-            // Nonaktifkan validasi untuk input wali
-            waliInputs.forEach(input => {
-                input.required = false;
-                input.value = ''; // Reset nilai input
-            });
-        }
-    });
-
-    // Ubah validasi kode pendaftaran untuk menggunakan SweetAlert
-    const kodeInput = document.getElementById('kode_pendaftaran_id');
-    const kodeError = document.getElementById('kode_error');
-
-    kodeInput.addEventListener('blur', async function() {
-        let kode = this.value;
-        if (kode) {
-            if (kode.startsWith('#')) {
-                kode = kode.substring(1);
-            }
-            
-            try {
-                const encodedKode = encodeURIComponent(kode);
-                const response = await fetch(`/api/check-kode/${encodedKode}`);
-                const data = await response.json();
+                penyakitFormSection.classList.add('hidden');
                 
-                if (!data.valid) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Nomor Urut Tidak Valid',
-                        text: data.message,
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#4920E5'
-                    });
-                    this.setCustomValidity(data.message);
-                    kodeError.classList.remove('hidden');
-                } else {
-                    kodeError.classList.add('hidden');
-                    this.setCustomValidity('');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan saat memeriksa Nomor Urut',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#4920E5'
+                // Clear all fields when hiding
+                const fieldsToClear = ['penyakit_berapalama', 'penyakit_kapan', 'penyakit_pantangan', 'mempunyai_alergi'];
+                fieldsToClear.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.value = '';
+                        field.required = false;
+                    }
                 });
             }
         }
-    });
-
-    const hasPenyakitSelect = document.getElementById('has_penyakit');
-    const penyakitDetails = document.getElementById('penyakitDetails');
-
-    hasPenyakitSelect.addEventListener('change', function() {
-        if (this.value === 'ya') {
-            penyakitDetails.classList.remove('hidden'); // Tampilkan detail penyakit
-        } else {
-            penyakitDetails.classList.add('hidden'); // Sembunyikan detail penyakit
+        
+        // Function to update wali form based on has_wali selection
+        function updateWaliForm() {
+            const hasWali = document.getElementById('has_wali').value;
+            const waliFormSection = document.getElementById('wali-form-section');
+            
+            // Show/hide the form section based on has_wali value
+            if (hasWali === 'ya') {
+                waliFormSection.classList.remove('hidden');
+                
+                // Add smooth animation
+                waliFormSection.style.opacity = '0';
+                setTimeout(() => {
+                    waliFormSection.style.opacity = '1';
+                }, 10);
+                
+                // Make all required fields in the wali section required
+                const requiredFields = ['nama_wali', 'hubungan_wali', 'pendidikan_terakhir_wali', 'pekerjaan_wali', 'no_hp_wali'];
+                requiredFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.required = true;
+                    }
+                });
+            } else {
+                waliFormSection.classList.add('hidden');
+                
+                // Clear all fields when hiding
+                const fieldsToClear = ['nama_wali', 'hubungan_wali', 'pendidikan_terakhir_wali', 'pekerjaan_wali', 'no_hp_wali', 'sosmed_wali'];
+                fieldsToClear.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.value = '';
+                        field.required = false;
+                    }
+                });
+            }
         }
-    });
-});
+        
+        // Initialize the form when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSiblingForm();
+            updatePenyakitForm();
+            updateWaliForm();
+            
+            // Initialize kode pendaftaran validation
+            const kodeInput = document.getElementById('kode_pendaftaran_id');
+            if (kodeInput) {
+                // Check if there's already a value (e.g., from form validation errors)
+                if (kodeInput.value) {
+                    checkKodePendaftaran(kodeInput.value);
+                }
+            }
+        });
 
-function updateNamaSaudaraForms() {
-    const jumlahSaudaraTiri = document.getElementById('jumlah_saudara_tiri').value;
-    const jumlahSaudaraKandung = document.getElementById('jumlah_saudara_kandung').value;
-    const namaSaudaraContainer = document.getElementById('namaSaudaraContainer');
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectHijaiyah = document.getElementById('keterangan_membaca_hijaiyah');
+            const bukuHijaiyah = document.getElementById('judulbuku_berlatihmembaca_hijaiyah').closest('.space-y-2');
+            const jilidHijaiyah = document.getElementById('jilid_hijaiyah').closest('.space-y-2');
 
-    // Menghitung total saudara
-    const totalSaudara = parseInt(jumlahSaudaraTiri) + parseInt(jumlahSaudaraKandung);
+            function toggleHijaiyahFields() {
+                if (selectHijaiyah.value === 'Belum bisa') {
+                    bukuHijaiyah.style.display = 'none';
+                    jilidHijaiyah.style.display = 'none';
+                } else {
+                    bukuHijaiyah.style.display = '';
+                    jilidHijaiyah.style.display = '';
+                }
+            }
+
+            // Inisialisasi saat load
+            toggleHijaiyahFields();
+            // Event listener saat berubah
+            selectHijaiyah.addEventListener('change', toggleHijaiyahFields);
+        });
+    </script>
     
-    // Menghapus form nama saudara yang ada
-    namaSaudaraContainer.innerHTML = '';
-
-    if (totalSaudara > 0) {
-        namaSaudaraContainer.classList.remove('hidden');
-        for (let i = 0; i < totalSaudara; i++) {
-            const label = document.createElement('label');
-            label.className = 'flex flex-col gap-[10px] font-semibold';
-            label.innerHTML = `
-                <span class="text-white">Nama Saudara ${i + 1}</span>
-                <input type="text" name="nama_saudara" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan nama saudara">
-                <span class="text-white">Hubungan Saudara ${i + 1}</span>
-                <input type="text" name="hubungan_saudara" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan hubungan saudara">
-                <span class="text-white">Umur Saudara ${i + 1}</span>
-                <input type="text" name="umur_saudara" class="bg-white rounded-full p-[14px_30px] appearance-none outline-none focus:ring-[3px] focus:ring-portto-green placeholder:font-normal placeholder:text-base placeholder:text-[#878C9C]" placeholder="Masukan nama umur saudara">
-            `;
-            namaSaudaraContainer.appendChild(label);
-        }
-    } else {
-        namaSaudaraContainer.classList.add('hidden');
-    }
-}
-</script>
-@endpush
-
-@push('styles')
-<style>
-/* Base styles */
-#multiStepForm {
-    width: 100%;
-    max-width: 550px;
-    margin: 0 auto;
-}
-
-/* Grid container untuk desktop */
-.grid.grid-cols-2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-    width: 100%;
-}
-
-/* Container utama */
-.w-full.lg\:w-1/2 {
-    width: 50%; /* Tetapkan lebar 50% untuk desktop */
-    max-width: 550px;
-    margin: 0 auto;
-}
-
-/* Form content */
-.step-content {
-    width: 100%;
-}
-
-/* Input fields */
-input[type="text"],
-input[type="email"],
-input[type="date"],
-input[type="number"],
-select,
-textarea {
-    width: 100%;
-    border-radius: 999px;
-    padding: 14px 30px;
-}
-
-/* Responsive styles */
-@media (max-width: 1024px) {
-    .w-full.lg\:w-1/2 {
-        width: 100%; /* Full width untuk mobile */
-        padding: 0 1rem;
-    }
-
-    .grid.grid-cols-2 {
-        grid-template-columns: 1fr; /* Single column untuk mobile */
-        gap: 1rem;
-    }
-
-    #multiStepForm {
-        padding: 0;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="date"],
-    input[type="number"],
-    select,
-    textarea {
-        padding: 12px 20px;
-        font-size: 14px;
-    }
-
-    .step-content {
-        padding: 1rem;
-    }
-
-    .flex.flex-col.gap-[10px] {
-        margin-bottom: 1rem;
-    }
-}
-
-/* Desktop-specific styles */
-@media (min-width: 1025px) {
-    #Content {
-        display: flex;
-        justify-content: center;
-    }
-
-    .w-full.lg\:w-1/2 {
-        width: 50%;
-        padding: 0 2rem;
-    }
-
-    .step-content {
-        max-width: 550px;
-        margin: 0 auto;
-    }
-}
-
-/* Button container */
-.flex.justify-between.mt-12 {
-    width: 100%;
-    gap: 1rem;
-    margin-top: 3rem;
-}
-
-/* Responsive buttons */
-@media (max-width: 480px) {
-    .flex.justify-between.mt-12 {
-        flex-direction: column;
-    }
-
-    button {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-}
-
-/* Tambahkan style untuk responsif */
-@media (max-width: 1024px) {
-    #Content {
-        flex-direction: column;
-    }
-    
-    .lg\:w-1/2 {
-        width: 100%;
-    }
-    
-    .w-[550px] {
-        width: 100%;
-    }
-    
-    /* Sesuaikan padding untuk mobile */
-    .p-[30px_40px] {
-        padding: 20px;
-    }
-}
-
-/* Style untuk form agar hidden di tampilan web */
-@media (min-width: 1025px) {
-    .form-header {
-        display: none;
-    }
-}
-
-/* Style untuk container form agar responsif */
-.flex.flex-col.gap-[50px] {
-    width: 100%;
-    max-width: 550px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-}
-
-/* Sesuaikan ukuran form untuk mobile */
-@media (max-width: 640px) {
-    .w-[550px] {
-        width: 100%;
-    }
-    
-    .step-content {
-        width: 100%;
-    }
-    
-    /* Sesuaikan ukuran progress indicator */
-    .flex.justify-between.w-[550px] {
-        width: 100%;
-        padding: 0 1rem;
-    }
-}
-
-@media (max-width: 1024px) {
-    #Content > div:first-child {
-        min-height: 400px; /* Atur tinggi minimum untuk layar mobile */
-    }
-}
-
-.flex.justify-between.w-full {
-    justify-content: center; /* Pusatkan tombol step */
-}
-
-.step {
-    flex: 1; /* Membuat setiap step memiliki lebar yang sama */
-    max-width: 100px; /* Atur lebar maksimum untuk setiap step */
-    position: relative; /* Untuk memastikan garis step berada di posisi yang benar */
-}
-
-.step::after {
-    display: none; /* Menghilangkan garis lurus di bawah step */
-    left: 50%; /* Pusatkan garis step */
-    transform: translateX(-50%); /* Pusatkan garis step */
-    width: 100%; /* Sesuaikan lebar garis step */
-}
-
-@media (max-width: 640px) {
-    .step {
-        max-width: 80px; /* Sesuaikan lebar maksimum untuk tampilan mobile */
-    }
-}
-
-/* Tambahkan atau update style untuk container tombol */
-.flex.justify-end.mt-12,
-.flex.justify-between.mt-12 {
-    margin-top: 3rem;      /* Jarak dari form */
-    margin-bottom: 2rem;   /* Jarak ke footer */
-    padding: 1rem 0;       /* Padding container tombol */
-    display: flex;
-    justify-content: space-between; /* Membuat jarak antara Previous dan Next */
-    width: 100%;           /* Memastikan container mengambil lebar penuh */
-}
-
-/* Style untuk tombol Previous dan Next Step */
-.prev-step,
-.next-step,
-button[type="submit"] {
-    padding: 1.25rem 2rem;  /* Padding tombol */
-    border-radius: 20px;    /* Border radius */
-    transition: all 0.3s ease; /* Animasi hover */
-    min-width: 120px;       /* Lebar minimum tombol */
-}
-
-/* Style untuk container form */
-.step-content {
-    padding-bottom: 2rem;   /* Padding bawah konten */
-}
-
-/* Style untuk container judul */
-.form-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-bottom: 2rem;
-    width: 100%;
-}
-
-.form-header h1 {
-    font-size: 24px;
-    margin-top: 1.5rem;
-    font-weight: bold;
-}
-
-.form-header p {
-    margin-top: 0.5rem;
-    color: #fff;
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-    .form-header {
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-header .logo-container {
-        max-width: 400px;
-    }
-
-    .form-header h1 {
-        font-size: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .form-header {
-        margin-bottom: 1rem;
-    }
-    
-    .form-header .logo-container {
-        max-width: 350px;
-    }
-
-    .form-header h1 {
-        font-size: 18px;
-    }
-}
-</style>
-@endpush
-@endsection
+</body>
+</html>

@@ -271,7 +271,11 @@ class PesertaResource extends Resource
                                     ->required(),
                                 Forms\Components\FileUpload::make('ttd_ortu')
                                     ->label('TTD Orang Tua')
-                                    ->image(),
+                                    ->image()
+                                    ->imageEditor()
+                                    ->imageCropAspectRatio('16:9')
+                                    ->imageResizeTargetWidth('1920')
+                                    ->imageResizeTargetHeight('1080'),
                                 Forms\Components\Select::make('is_pindahan')
                                     ->label('Masuk TK ini Sebagai ')
                                     ->live()

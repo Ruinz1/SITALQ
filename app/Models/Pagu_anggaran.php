@@ -43,19 +43,6 @@ class Pagu_anggaran extends Model
 
     protected static function booted()
     {
-        static::updated(function ($paguAnggaran) {
-            // Cek apakah status berubah menjadi 'accepted'
-            if ($paguAnggaran->isDirty('status') && $paguAnggaran->status === 'accepted') {
-                try {
-                    // Panggil method untuk mengurangi kas
-                    \App\Models\Kas::kurangiKasDariPaguAnggaran($paguAnggaran);
-                } catch (\Exception $e) {
-                    // Jika terjadi error, kembalikan status ke nilai sebelumnya
-                    $paguAnggaran->status = $paguAnggaran->getOriginal('status');
-                    $paguAnggaran->save();
-                    throw $e;
-                }
-            }
-        });
+        static::observe(\App\Observers\PaguAnggaranObserver::class);
     }
 }

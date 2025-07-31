@@ -58,7 +58,18 @@ class PaguAnggaranResource extends Resource
                         }
                     })
                     ->disabled(fn () => Auth::user()->hasRole('guru')),
-                Forms\Components\TextInput::make('satuan')
+                Forms\Components\Select::make('satuan')
+                    ->options([
+                       'Unit' => 'Unit',
+                        'Paket / Dus' => 'Paket / Dus',
+                        'Liter' => 'Liter',
+                        'Meter' => 'Meter',
+                        'Kg' => 'Kg',
+                        'Lusin' => 'Lusin',
+                        'Rim' => 'Rim',
+                        'Set' => 'Set',
+                    ])
+                    ->label('Satuan Barang')
                     ->required()
                     ->disabled(fn () => Auth::user()->hasRole('guru')),
                 Forms\Components\TextInput::make('jumlah')

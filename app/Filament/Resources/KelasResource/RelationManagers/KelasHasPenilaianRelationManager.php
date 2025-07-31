@@ -128,6 +128,7 @@ class KelasHasPenilaianRelationManager extends RelationManager
         $guru = Guru::where('user_id', $user->id)->first();
         $kelas = $this->getOwnerRecord();
         $isGuruAktif = $guru && $kelas->guru_id === $guru->id;
+        $isAdminOrSuperAdmin = $user->hasRole(['Admin', 'Super_Admin']);
 
         return $table
             ->recordTitleAttribute('kelasHasPeserta.peserta.nama')
@@ -182,7 +183,7 @@ class KelasHasPenilaianRelationManager extends RelationManager
                 Tables\Actions\Action::make('syncPeserta')
                     ->label('Sinkronisasi Peserta')
                     ->icon('heroicon-o-arrow-path')
-                    ->visible($isGuruAktif)
+                    ->visible($isAdminOrSuperAdmin)
                     ->form([
                         Forms\Components\Select::make('semester')
                             ->label('Semester')
