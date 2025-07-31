@@ -1,4 +1,4 @@
-# Sistem Manajemen Sekolah - Trial Role Project
+# Sistem Informasi Manajemen Sekolah - Sistem Informasi Terpadu Al Qolam
 
 <p align="center">
 <img src="https://img.shields.io/badge/Laravel-11.9-red.svg" alt="Laravel Version">
