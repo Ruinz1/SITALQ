@@ -64,10 +64,8 @@ class KelasHasPesertaRelationManager extends RelationManager
             ->whereHas('kodePendaftaran.pendaftaran', function (Builder $query) use ($tahunAjaranId) {
                 $query->where('tahun_ajaran_id', $tahunAjaranId);
             })
-            ->whereDoesntHave('kelasHasPeserta', function (Builder $query) use ($tahunAjaranId) {
-                $query->whereHas('kelas', function (Builder $q) use ($tahunAjaranId) {
-                    $q->where('tahun_ajaran_id', $tahunAjaranId);
-                });
+            ->whereDoesntHave('kelasHasPeserta.kelas', function (Builder $query) use ($tahunAjaranId) {
+                $query->where('tahun_ajaran_id', $tahunAjaranId);
             })
             ->pluck('nama', 'id')
             ->toArray();
@@ -84,6 +82,9 @@ class KelasHasPesertaRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('peserta.nama')
+            ->modifyQueryUsing(function (Builder $query) {
+                return $query->with(['peserta', 'kelas']);
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('index')
                     ->label('No.')
@@ -178,10 +179,8 @@ class KelasHasPesertaRelationManager extends RelationManager
                             ->whereHas('kodePendaftaran.pendaftaran', function (Builder $query) use ($kelas) {
                                 $query->where('tahun_ajaran_id', $kelas->tahun_ajaran_id);
                             })
-                            ->whereDoesntHave('kelasHasPeserta', function (Builder $query) use ($kelas) {
-                                $query->whereHas('kelas', function (Builder $q) use ($kelas) {
-                                    $q->where('tahun_ajaran_id', $kelas->tahun_ajaran_id);
-                                });
+                            ->whereDoesntHave('kelasHasPeserta.kelas', function (Builder $query) use ($kelas) {
+                                $query->where('tahun_ajaran_id', $kelas->tahun_ajaran_id);
                             })
                             ->get();
 

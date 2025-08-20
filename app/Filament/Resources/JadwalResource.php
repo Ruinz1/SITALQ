@@ -78,13 +78,19 @@ class JadwalResource extends Resource
                         'Kamis' => 'Kamis',
                         'Jumat' => 'Jumat',
                     ])
-                    ->required(),
+                    ->required()
+                    ->default(function () {
+                        return request()->get('hari');
+                    }),
                 Forms\Components\TimePicker::make('jam')
                     ->required()
                     ->withoutSeconds()
                     ->format('H:i')
                     ->hoursStep(1)
-                    ->minutesStep(5),
+                    ->minutesStep(5)
+                    ->default(function () {
+                        return request()->get('jam');
+                    }),
 
                 Forms\Components\Select::make('tahun_ajaran_id')
                     ->relationship('tahunAjaran', 'nama', function ($query) {

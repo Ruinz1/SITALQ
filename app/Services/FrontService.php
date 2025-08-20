@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\jadwal;
+use App\Models\Kelas;
 use App\Models\Pendaftaran;
 
 class FrontService
@@ -19,7 +20,8 @@ class FrontService
     public function getJadwal()
     {
         $jadwal = jadwal::with(['guru.mapel', 'kelas'])->get();
-        return compact('jadwal');
+        $kelas = Kelas::orderBy('nama_kelas')->get();
+        return compact('jadwal', 'kelas');
     }
 
     

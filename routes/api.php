@@ -6,6 +6,7 @@ use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\MidtransCallbackController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\JadwalScheduleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,3 +20,7 @@ use App\Http\Controllers\PaymentController;
 */
 
 Route::post('/payment/notification', [PaymentController::class, 'notificationHandler']); 
+
+// Jadwal Schedule API
+Route::get('/jadwal/schedule', [App\Http\Controllers\JadwalScheduleController::class, 'getSchedule']);
+Route::get('/jadwal/conflicts', [App\Http\Controllers\JadwalScheduleController::class, 'getConflicts']);

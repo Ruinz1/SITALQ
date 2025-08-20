@@ -2,48 +2,122 @@
 @section('title', 'Akademik - TKIT Al Qolam')
 @section('content')
 </section>
-<section id="Details" class="container max-w-[1130px] mx-auto pt-[50px] px-6 sm:px-8 md:px-12 lg:px-0">
-    <h2 class="font-extrabold text-xl sm:text-2xl">Akademik : tahun ajaran 2024/2025</h2>
-    <div class="flex flex-col sm:flex-row gap-[30px] sm:gap-[50px] justify-center">
-        <div class="flex flex-col gap-5 max-w-full sm:max-w-[850px] text-center mb-32">
-            <h2 class="font-extrabold text-xl sm:text-2xl">Jadwal</h2>
-            
-            <div class="overflow-x-auto shadow-lg rounded-lg">
-                <table class="min-w-full bg-white border border-gray-300">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="border p-4">No</th>
-                            <th class="border p-4">Mata Pelajaran</th>
-                            <th class="border p-4">Guru</th>
-                            <th class="border p-4">Jadwal</th>
-                            <th class="border p-4">Kelas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($jadwal as $item)
-                        <tr>
-                            <td class="border p-3 text-center">{{ $loop->iteration }}</td>
-                            <td class="border p-3">{{ $item->guru->mapel->nama }}</td>
-                            <td class="border p-3">{{ $item->guru->nama }}</td>
-                            <td class="border p-3">{{ $item->hari }}, {{ $item->jam }}</td>
-                            <td class="border p-3">{{ $item->kelas->nama_kelas }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+<section class="container max-w-[1130px] mx-auto pt-[30px] px-6 sm:px-8 md:px-12 lg:px-0">
+    <h2 class="font-extrabold text-xl sm:text-2xl mb-4">Jadwal Pelajaran</h2>
+
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                <select id="kelas-filter" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Semua Kelas</option>
+                    @php($kelasList = ($kelas ?? collect()))
+                    @foreach($kelasList as $k)
+                        <option value="{{ $k->id }}">{{ $k->nama_kelas }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="sm:col-span-2 flex gap-3 sm:justify-end">
+                <a id="print-btn" href="{{ route('jadwal.download') }}" target="_blank" class="inline-flex items-center bg-indigo-600 text-black px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Cetak / Unduh
+                </a>
             </div>
         </div>
+        <p id="choose-hint" class="text-sm text-gray-500">Silakan pilih kelas terlebih dahulu.</p>
     </div>
-    <div style="margin-top: 4rem;" class="flex justify-center mb-32">
-        <a href="{{ route('jadwal.download') }}" style="display: inline-flex; background: blue; color: white; padding: 10px 20px; border-radius: 8px;">
-            <svg xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; margin-right: 8px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Unduh Jadwal
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Senin</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Selasa</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Rabu</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Kamis</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">Jumat</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-body">
+                    <tr><td colspan="5" class="text-center py-6 text-black">SILAHKAN PILIH KELAS</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="flex justify-center mt-6">
+        <a id="print-btn-bottom" href="{{ route('jadwal.download') }}" target="_blank" class="inline-flex items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            Cetak / Unduh
         </a>
     </div>
 </section>
 @endsection
 @push('scripts')
     <script src="{{ asset('main.js') }}"></script>
-    @endpush
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const kelasSelect = document.getElementById('kelas-filter');
+            const tbody = document.getElementById('schedule-body');
+            const chooseHint = document.getElementById('choose-hint');
+            const printBtn = document.getElementById('print-btn');
+            const printBtnBottom = document.getElementById('print-btn-bottom');
+
+            const all = @json($jadwal ?? []);
+            const data = Array.isArray(all) ? all : (all.jadwal ?? []);
+
+            function renderTable(rows){
+                tbody.innerHTML = '';
+                const by = {Senin:[],Selasa:[],Rabu:[],Kamis:[],Jumat:[]};
+                rows.forEach(r=>{
+                    const t = (r.jam||'').substring(0,5);
+                    if (!by[r.hari]) return;
+                    const text = `${r.guru?.nama ?? ''}, ${r.guru?.mapel?.nama ?? ''}, : ${t}`;
+                    by[r.hari].push({ time: t, text });
+                });
+
+                const sortByTime = list => list
+                    .slice()
+                    .sort((a,b) => (a.time||'').localeCompare(b.time||''))
+                    .map(x => x.text);
+
+                const senin  = sortByTime(by.Senin);
+                const selasa = sortByTime(by.Selasa);
+                const rabu   = sortByTime(by.Rabu);
+                const kamis  = sortByTime(by.Kamis);
+                const jumat  = sortByTime(by.Jumat);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="border p-3 align-top">${senin.join('<br>')}</td>
+                    <td class="border p-3 align-top">${selasa.join('<br>')}</td>
+                    <td class="border p-3 align-top">${rabu.join('<br>')}</td>
+                    <td class="border p-3 align-top">${kamis.join('<br>')}</td>
+                    <td class="border p-3 align-top">${jumat.join('<br>')}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            function applyFilter(){
+                const kelasId = kelasSelect.value;
+                const filtered = kelasId ? data.filter(d => String(d.kelas_id) === String(kelasId)) : data;
+                if (!kelasId) {
+                    chooseHint.classList.remove('hidden');
+                    printBtn.setAttribute('disabled','disabled');
+                    printBtnBottom.setAttribute('disabled','disabled');
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-black">SILAHKAN PILIH KELAS</td></tr>';
+                } else {
+                    chooseHint.classList.add('hidden');
+                    printBtn.removeAttribute('disabled');
+                    printBtnBottom.removeAttribute('disabled');
+                    const base = `{{ route('jadwal.download') }}`;
+                    printBtn.href = `${base}?kelas_id=${kelasId}`;
+                    printBtnBottom.href = `${base}?kelas_id=${kelasId}`;
+                }
+                renderTable(filtered);
+            }
+
+            kelasSelect.addEventListener('change', applyFilter);
+            applyFilter();
+        });
+    </script>
+@endpush

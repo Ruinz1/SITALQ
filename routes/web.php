@@ -84,6 +84,17 @@ Route::middleware(['web'])->group(function () {
 Route::prefix('api')->group(function () {
     Route::get('/check-kode/{kode}', [PesertaController::class, 'checkKode']);
     Route::get('/check-pembayaran/{kode}', [PembayaranController::class, 'checkKode']);
+    
+    // Jadwal Schedule API
+    Route::get('/jadwal/schedule', [App\Http\Controllers\JadwalScheduleController::class, 'getSchedule']);
+    Route::get('/jadwal/conflicts', [App\Http\Controllers\JadwalScheduleController::class, 'getConflicts']);
+});
+
+
+// Aksi Jadwal (web, proteksi auth + role)
+Route::middleware(['web', 'auth', 'role:Admin|Super_Admin'])->group(function () {
+    Route::delete('/jadwal/delete/{jadwal}', [App\Http\Controllers\JadwalScheduleController::class, 'destroy'])
+        ->name('jadwal.destroy');
 });
 
 

@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="{{ asset('assets/images/logos/logo-tk-circle.png') }}">
   <link rel="shortcut icon" type="image/png" href="{{ asset('assets/images/logos/logo-tk-circle.png') }}">
   <link href="{{asset('output.css')}}" rel="stylesheet">
+  <link rel="stylesheet" href="{{asset('calender-styles.css')}}">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     [x-cloak] { display: none !important; }

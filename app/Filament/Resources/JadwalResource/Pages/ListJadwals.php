@@ -16,4 +16,17 @@ class ListJadwals extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getViewData(): array
+    {
+        return [
+            'tahunAjarans' => \App\Models\TahunAjaran::where('status', '1')->get(),
+            'kelas' => \App\Models\Kelas::all(),
+        ];
+    }
+
+    public function getView(): string
+    {
+        return 'filament.resources.jadwal-resource.pages.list-jadwals';
+    }
 }
