@@ -81,7 +81,6 @@ class TransaksiResource extends Resource
                     ->dehydrated()
                     ->label('Status Pembayaran'),
                 Forms\Components\TextInput::make('kode_transaksi')
-                    ->disabled()
                     ->dehydrated()
                     ->label('Kode Transaksi'),
                 Forms\Components\TextInput::make('midtrans_payment_type')

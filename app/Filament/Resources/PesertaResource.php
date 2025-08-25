@@ -633,13 +633,82 @@ class PesertaResource extends Resource
                     ->preload()
                     ->label('Peralatan Elektronik yang Dimiliki')
                     ->options([
-                        'Televisi' => 'Televisi',
-                        'Smartphone' => 'Smartphone',
-                        'Laptop' => 'Laptop',
-                        'Kamera Digital' => 'Kamera Digital',
+                        'TV' => 'TV',
+                        'Kulkas' => 'Kulkas',
+                        'Mesin Cuci' => 'Mesin Cuci',
+                        'AC' => 'AC',
+                        'Microwave' => 'Microwave',
+                        'Komputer' => 'Komputer',
+                        'Lainnya' => 'Lainnya',
                     ])
                     ->required()
                     ->default([])
+                    ->afterStateHydrated(function ($component, $state) {
+                        // State di DB disimpan sebagai JSON string; normalisasi ke array untuk multiple select
+                        if (is_string($state) && $state !== '') {
+                            $decoded = json_decode($state, true);
+                            // Jika double-encoded (mis. "[\"tv\",\"kulkas\"]"), decode dua kali
+                            if (is_string($decoded)) {
+                                $decoded = json_decode($decoded, true);
+                            }
+                            if (is_array($decoded)) {
+                                $normalized = array_map(function ($value) {
+                                    $v = strtolower((string) $value);
+                                    return match ($v) {
+                                        'tv' => 'TV',
+                                        'kulkas' => 'Kulkas',
+                                        'mesin cuci', 'mesin_cuci' => 'Mesin Cuci',
+                                        'ac' => 'AC',
+                                        'microwave' => 'Microwave',
+                                        'komputer' => 'Komputer',
+                                        'lainnya' => 'Lainnya',
+                                        default => $value,
+                                    };
+                                }, $decoded);
+                                $component->state(array_values(array_unique($normalized)));
+                            } else {
+                                $component->state([]);
+                            }
+                        } elseif (is_array($state)) {
+                            // Pastikan case konsisten saat edit
+                            $normalized = array_map(function ($value) {
+                                $v = strtolower((string) $value);
+                                return match ($v) {
+                                    'tv' => 'TV',
+                                    'kulkas' => 'Kulkas',
+                                    'mesin cuci', 'mesin_cuci' => 'Mesin Cuci',
+                                    'ac' => 'AC',
+                                    'microwave' => 'Microwave',
+                                    'komputer' => 'Komputer',
+                                    'lainnya' => 'Lainnya',
+                                    default => $value,
+                                };
+                            }, $state);
+                            $component->state(array_values(array_unique($normalized)));
+                        } else {
+                            $component->state([]);
+                        }
+                    })
+                    ->dehydrateStateUsing(function ($state) {
+                        // Simpan sebagai JSON string dengan format snake_case lower untuk konsistensi lama
+                        if (is_array($state)) {
+                            $normalized = array_map(function ($value) {
+                                $v = (string) $value;
+                                return match ($v) {
+                                    'TV' => 'tv',
+                                    'Kulkas' => 'kulkas',
+                                    'Mesin Cuci' => 'mesin_cuci',
+                                    'AC' => 'ac',
+                                    'Microwave' => 'microwave',
+                                    'Komputer' => 'komputer',
+                                    'Lainnya' => 'lainnya',
+                                    default => strtolower(str_replace(' ', '_', $v)),
+                                };
+                            }, $state);
+                            return json_encode(array_values(array_unique($normalized)));
+                        }
+                        return $state;
+                    })
                     ->helperText('Pilih satu atau lebih peralatan elektronik yang dimiliki')
                     ->columnSpanFull()
                 ])
@@ -944,7 +1013,7 @@ class PesertaResource extends Resource
                     ->requiresConfirmation()
                     ->visible(function (Peserta $record): bool {
                         // Debug log
-                        \Log::info('Checking visibility for Terima button', [
+                        Log::info('Checking visibility for Terima button', [
                             'peserta_id' => $record->id,
                             'status_peserta' => $record->status_peserta,
                             'transaksi' => $record->transaksi,

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Peserta;
 use App\Models\KodePendaftaran;
 use App\Models\transaksi;
+use App\Models\Kas;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 
@@ -35,8 +36,20 @@ class PesertaObserver
      */
     public function deleting(Peserta $peserta): void
     {
-        // Hapus semua transaksi yang memiliki peserta_id yang sama
-        transaksi::where('peserta_id', $peserta->id)->delete();
+        // Ambil semua transaksi terkait peserta ini
+        $transaksiIds = Transaksi::where('peserta_id', $peserta->id)->pluck('id');
+
+        // Hapus entri kas yang terkait dengan transaksi-transaksi tersebut (soft delete)
+        if ($transaksiIds->isNotEmpty()) {
+            $deletedKas = Kas::whereIn('transaksi_id', $transaksiIds)->delete();
+            Log::info('Menghapus kas terkait transaksi peserta', [
+                'peserta_id' => $peserta->id,
+                'deleted_kas' => $deletedKas
+            ]);
+        }
+
+        // Hapus semua transaksi yang memiliki peserta_id yang sama (soft delete)
+        Transaksi::where('peserta_id', $peserta->id)->delete();
         
         Log::info('Menghapus transaksi terkait untuk peserta', [
             'peserta_id' => $peserta->id,

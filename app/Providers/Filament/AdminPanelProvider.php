@@ -19,7 +19,8 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Resources\AdminResource\Widgets\StatsAdminOverview;
-use App\Filament\Resources\Guru,PesertaResource\Widgets\StatistikWidget;
+use App\Filament\Resources\AdminResource\Widgets\PendaftaranPerTahunChart;
+use App\Filament\Resources\AdminResource\Widgets\JenisKelaminChart;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissions;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 
@@ -39,11 +40,15 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 UserMenuItem::make()
                     ->label('Setting')
-                    ->visible(fn () => auth()->check() && !auth()->user()->hasRole('Guru'))
-                    ->url(fn () => auth()->user() 
-                        ? url('admin/users/'.auth()->user()->id.'/edit')
-                        : '#'
-                    )
+                    ->visible(function () {
+                        $user = auth()->user();
+                        if (!$user) return false;
+                        return method_exists($user, 'hasRole') ? !$user->hasRole('Guru') : true;
+                    })
+                    ->url(function () {
+                        $user = auth()->user();
+                        return $user ? url('admin/users/' . $user->id . '/edit') : '#';
+                    })
                     ->icon('heroicon-o-cog-6-tooth'),
             ])
             ->databaseNotifications()
@@ -54,9 +59,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                
                 StatsAdminOverview::class,
-                
+                JenisKelaminChart::class,
+                PendaftaranPerTahunChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

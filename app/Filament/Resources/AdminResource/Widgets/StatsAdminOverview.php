@@ -7,6 +7,7 @@ use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Jadwal;
 use App\Models\Peserta;
+use App\Models\KodePendaftaran;
 use App\Models\Pendaftaran;
 use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,8 @@ class StatsAdminOverview extends BaseWidget
 {
     protected function getStats(): array
     {
-        $isGuru = Auth::user()->hasRole('Guru'); // Cek role user
+        // Tampilkan semua statistik untuk menyederhanakan hak akses dan menghindari dependency role
+        $isGuru = false;
         
         $stats = [
             Stat::make('Tahun Ajaran', TahunAjaran::where('status', '1')->first()?->nama ?? '-')
@@ -54,7 +56,7 @@ class StatsAdminOverview extends BaseWidget
                 ->descriptionIcon('heroicon-o-user-group')
                 ->color('success');
 
-            $stats[] = Stat::make('Total Siswa', Peserta::count())
+            $stats[] = Stat::make('Total Siswa', Peserta::where('tanggal_diterima', '!=', null)->count())
                 ->description('Jumlah Siswa')
                 ->descriptionIcon('heroicon-o-user-group')
                 ->color('success');

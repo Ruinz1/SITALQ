@@ -13,62 +13,110 @@ class PaguAnggaranObserver
      */
     public function updated(Pagu_anggaran $paguAnggaran)
     {
-        // Cek apakah status berubah menjadi approved
-        if ($paguAnggaran->isDirty('status') && $paguAnggaran->status === 'approved') {
-            try {
-                // Cek saldo kas sebelum menyetujui
-                $saldoKas = $this->getSaldoKas($paguAnggaran->tahun_ajaran_id);
-                
-                if ($saldoKas < $paguAnggaran->total_harga) {
-                    // Jika saldo tidak cukup, tolak pagu anggaran
-                    $paguAnggaran->status = 'rejected';
-                    $paguAnggaran->alasan_penolakan = 'Saldo kas tidak mencukupi. Saldo tersedia: Rp ' . number_format($saldoKas, 0, ',', '.') . ', Kebutuhan: Rp ' . number_format($paguAnggaran->total_harga, 0, ',', '.');
-                    $paguAnggaran->save();
-                    
-                    Log::warning('Pagu anggaran ditolak karena saldo kas tidak mencukupi', [
-                        'pagu_anggaran_id' => $paguAnggaran->id,
-                        'nama_item' => $paguAnggaran->nama_item,
-                        'total_harga' => $paguAnggaran->total_harga,
-                        'saldo_kas' => $saldoKas,
-                        'kekurangan' => $paguAnggaran->total_harga - $saldoKas
+        try {
+            // Jika status berubah
+            if ($paguAnggaran->isDirty('status')) {
+                // Jika berubah menjadi approved
+                if ($paguAnggaran->status === 'approved') {
+                    $saldoKas = $this->getSaldoKas($paguAnggaran->tahun_ajaran_id);
+                    if ($saldoKas < $paguAnggaran->total_harga) {
+                        $paguAnggaran->status = 'rejected';
+                        $paguAnggaran->alasan_penolakan = 'Saldo kas tidak mencukupi. Saldo tersedia: Rp ' . number_format($saldoKas, 0, ',', '.') . ', Kebutuhan: Rp ' . number_format($paguAnggaran->total_harga, 0, ',', '.');
+                        $paguAnggaran->save();
+                        Log::warning('Pagu anggaran ditolak karena saldo kas tidak mencukupi', [
+                            'pagu_anggaran_id' => $paguAnggaran->id,
+                            'nama_item' => $paguAnggaran->nama_item,
+                            'total_harga' => $paguAnggaran->total_harga,
+                            'saldo_kas' => $saldoKas,
+                            'kekurangan' => $paguAnggaran->total_harga - $saldoKas
+                        ]);
+                        throw new \Exception('Pagu anggaran ditolak karena saldo kas tidak mencukupi.');
+                    }
+                    // Buat/selaraskan entri kas
+                    Kas::updateOrCreate(
+                        ['pagu_anggaran_id' => $paguAnggaran->id],
+                        [
+                            'transaksi_id' => null,
+                            'tahun_ajaran_id' => $paguAnggaran->tahun_ajaran_id,
+                            'tipe' => 'keluar',
+                            'sumber' => 'Anggaran/Pengadaan',
+                            'jumlah' => $paguAnggaran->total_harga,
+                            'kategori' => $paguAnggaran->kategori,
+                            'keterangan' => $paguAnggaran->keterangan,
+                            'tanggal' => now(),
+                            'user_id' => $paguAnggaran->disetujui_oleh,
+                        ]
+                    );
+                    Log::info('Entri kas diselaraskan untuk pagu anggaran (approved)', [
+                        'pagu_anggaran_id' => $paguAnggaran->id
                     ]);
-                    
-                    throw new \Exception('Pagu anggaran ditolak karena saldo kas tidak mencukupi. Saldo tersedia: Rp ' . number_format($saldoKas, 0, ',', '.') . ', Kebutuhan: Rp ' . number_format($paguAnggaran->total_harga, 0, ',', '.'));
+                } else {
+                    // Jika status menjadi non-approved dari approved, hapus kas terkait
+                    $wasApproved = $paguAnggaran->getOriginal('status') === 'approved';
+                    if ($wasApproved) {
+                        $deleted = Kas::where('pagu_anggaran_id', $paguAnggaran->id)->delete();
+                        Log::info('Status pagu berubah dari approved ke non-approved, menghapus kas', [
+                            'pagu_anggaran_id' => $paguAnggaran->id,
+                            'deleted' => $deleted
+                        ]);
+                    }
                 }
-                
-                // Buat entri baru ke tabel kas
-                Kas::create([
-                    'transaksi_id' => null,
-                    'pagu_anggaran_id' => $paguAnggaran->id,
-                    'tahun_ajaran_id' => $paguAnggaran->tahun_ajaran_id,
-                    'tipe' => 'keluar',
-                    'sumber' => 'Anggaran/Pengadaan',
-                    'jumlah' => $paguAnggaran->total_harga,
-                    'kategori' => $paguAnggaran->kategori,
-                    'keterangan' => $paguAnggaran->keterangan,
-                    'tanggal' => now(),
-                    'user_id' => $paguAnggaran->disetujui_oleh,
-                ]);
-                
-                Log::info('Entri kas berhasil dibuat untuk pagu anggaran', [
-                    'pagu_anggaran_id' => $paguAnggaran->id,
-                    'nama_item' => $paguAnggaran->nama_item,
-                    'jumlah' => $paguAnggaran->total_harga,
-                    'keterangan' => $paguAnggaran->keterangan
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Gagal membuat entri kas untuk pagu anggaran', [
-                    'pagu_anggaran_id' => $paguAnggaran->id,
-                    'error' => $e->getMessage()
-                ]);
-                
-                // Jika terjadi error dan status belum diubah ke rejected, kembalikan status ke nilai sebelumnya
-                if ($paguAnggaran->status !== 'rejected') {
-                    $paguAnggaran->status = $paguAnggaran->getOriginal('status');
-                    $paguAnggaran->save();
-                }
-                throw $e;
+                return;
             }
+
+            // Jika status tidak berubah dan tetap approved, namun ada perubahan data penting
+            if ($paguAnggaran->status === 'approved') {
+                $relevantChanged = $paguAnggaran->wasChanged('total_harga')
+                    || $paguAnggaran->wasChanged('kategori')
+                    || $paguAnggaran->wasChanged('keterangan')
+                    || $paguAnggaran->wasChanged('tahun_ajaran_id')
+                    || $paguAnggaran->wasChanged('disetujui_oleh');
+
+                if ($relevantChanged) {
+                    // Jika ada kenaikan total_harga, validasi delta terhadap saldo kas
+                    $kas = Kas::where('pagu_anggaran_id', $paguAnggaran->id)->first();
+                    $oldJumlah = $kas?->jumlah ?? 0;
+                    $delta = (float) $paguAnggaran->total_harga - (float) $oldJumlah;
+                    if ($delta > 0) {
+                        $saldoKas = $this->getSaldoKas($paguAnggaran->tahun_ajaran_id);
+                        if ($saldoKas < $delta) {
+                            Log::warning('Kenaikan total_harga melebihi saldo kas', [
+                                'pagu_anggaran_id' => $paguAnggaran->id,
+                                'delta' => $delta,
+                                'saldo_kas' => $saldoKas
+                            ]);
+                            // Batalkan perubahan nilai ke nilai sebelumnya
+                            $paguAnggaran->total_harga = $oldJumlah;
+                            $paguAnggaran->save();
+                            throw new \Exception('Perubahan total anggaran dibatalkan karena saldo kas tidak mencukupi.');
+                        }
+                    }
+
+                    Kas::updateOrCreate(
+                        ['pagu_anggaran_id' => $paguAnggaran->id],
+                        [
+                            'transaksi_id' => null,
+                            'tahun_ajaran_id' => $paguAnggaran->tahun_ajaran_id,
+                            'tipe' => 'keluar',
+                            'sumber' => 'Anggaran/Pengadaan',
+                            'jumlah' => $paguAnggaran->total_harga,
+                            'kategori' => $paguAnggaran->kategori,
+                            'keterangan' => $paguAnggaran->keterangan,
+                            'tanggal' => now(),
+                            'user_id' => $paguAnggaran->disetujui_oleh,
+                        ]
+                    );
+                    Log::info('Entri kas diselaraskan untuk pagu anggaran (updated fields)', [
+                        'pagu_anggaran_id' => $paguAnggaran->id
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Gagal menyelaraskan entri kas untuk pagu anggaran', [
+                'pagu_anggaran_id' => $paguAnggaran->id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
         }
     }
 

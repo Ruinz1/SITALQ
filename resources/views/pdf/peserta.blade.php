@@ -475,7 +475,7 @@
                     Kepala TKIT Al Qolam
                     <br>
                     @php
-                    $imagePath = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'wadek.png');
+                    $imagePath = storage_path('app' . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'kepsek.png');
                     if (file_exists($imagePath)) {
                         try {
                             $imageData = base64_encode(file_get_contents($imagePath));

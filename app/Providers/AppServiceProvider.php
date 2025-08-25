@@ -36,8 +36,8 @@ class AppServiceProvider extends ServiceProvider
         TahunAjaran::observe(TahunAjaranObserver::class);
         Pendaftaran::observe(PendaftaranObserver::class);
         Peserta::observe(PesertaObserver::class);
-        // Transaksi::observe(TransaksiObserver::class);
-        // Pagu_anggaran::observe(PaguAnggaranObserver::class);
+        Transaksi::observe(TransaksiObserver::class);
+        Pagu_anggaran::observe(PaguAnggaranObserver::class);
 
         \Illuminate\Database\Eloquent\Model::preventLazyLoading(!app()->environment('production'));
     }

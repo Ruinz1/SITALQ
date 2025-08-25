@@ -157,8 +157,6 @@ class PesertaController extends Controller
                 'wali_id' => $wali ? $wali->id : null,
             ]);
 
-            //add to saudara
-            
 
             // 5. Buat data Informasi Peserta
             $informasi = InformasiPeserta::create([
@@ -263,13 +261,33 @@ class PesertaController extends Controller
             
             ]);
 
-            // Create sibling data only if sibling fields exist
-            if ($request->has('nama_saudara') && $request->nama_saudara) {
-                $saudara = Saudara::create([
+            // Simpan data saudara dari field dinamis (nama_saudara{n}, hubungan_saudara{n}, umur_saudara{n})
+            $createdSiblings = 0;
+            foreach ($request->keys() as $key) {
+                if (preg_match('/^nama_saudara(\d+)$/', $key, $m)) {
+                    $idx = $m[1];
+                    $namaSaudara = trim((string) $request->input('nama_saudara' . $idx));
+                    $hubunganSaudara = $request->input('hubungan_saudara' . $idx);
+                    $umurSaudara = $request->input('umur_saudara' . $idx);
+
+                    if ($namaSaudara !== '') {
+                        Saudara::create([
+                            'peserta_id' => $peserta->id,
+                            'nama' => $namaSaudara,
+                            'hubungan' => $hubunganSaudara,
+                            'umur' => $umurSaudara,
+                        ]);
+                        $createdSiblings++;
+                    }
+                }
+            }
+            // Fallback: jika ada field tanpa index (nama_saudara, hubungan_saudara, umur_saudara)
+            if ($createdSiblings === 0 && $request->filled('nama_saudara')) {
+                Saudara::create([
                     'peserta_id' => $peserta->id,
-                    'nama' => $request->nama_saudara,
-                    'hubungan' => $request->hubungan_saudara,
-                    'umur' => $request->umur_saudara,
+                    'nama' => $request->input('nama_saudara'),
+                    'hubungan' => $request->input('hubungan_saudara'),
+                    'umur' => $request->input('umur_saudara'),
                 ]);
             }
 
